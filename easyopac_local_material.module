@@ -1,0 +1,683 @@
+<?php
+
+/**
+ * @file
+ * Code for the easyOPAC Local Material feature.
+ */
+
+include_once 'easyopac_local_material.features.inc';
+
+/**
+ * Implements hook_menu().
+ */
+function easyopac_local_material_menu() {
+  $items['admin/import/ting'] = [
+    'title' => 'Import ting items',
+    'description' => 'Get remote ting objects data to local storage.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => ['easyopac_local_material_ting_object_import_form'],
+    'access arguments' => ['access content'],
+  ];
+
+  return $items;
+}
+
+/**
+ * Ting Objects import initialization form.
+ *
+ * @return array|mixed
+ *   Form structure.
+ */
+function easyopac_local_material_ting_object_import_form() {
+  $form['import'] = [
+    '#type' => 'submit',
+    '#value' => 'Start import',
+  ];
+
+  return $form;
+}
+
+/**
+ * Ting Objects import batch.
+ *
+ * @param bool $success
+ *   Batch operation status.
+ * @param array $operations
+ *   Set of started operations to be processed.
+ */
+function easyopac_local_material_batch_finished($success, array $operations) {
+  if ($success) {
+    drupal_set_message('Import is complete!');
+  }
+  else {
+    $error_operation = reset($operations);
+    $message = t('An error occurred while processing %error_operation with arguments: @arguments', [
+      '%error_operation' => $error_operation[0],
+      '@arguments' => print_r($error_operation[1], TRUE),
+    ]);
+    drupal_set_message($message, 'error');
+    drupal_set_message(l(t('Run again'), 'admin/import/ting'));
+  }
+}
+
+/**
+ * Processing of series field.
+ *
+ * @param object $entity
+ *   Ting Object entity.
+ *
+ * @return string|null
+ *   Prepared series field data for saving in database or empty string.
+ */
+function easyopac_local_material_get_series($entity) {
+  $markup = '';
+  if ($entity->serieTitle) {
+    foreach ($entity->serieTitle as $title) {
+      $series_number = isset($title[1]) ? ' : ' . check_plain($title[1]) . ' ; ' : ' ; ';
+      $markup = $title[0] . $series_number;
+    }
+  }
+  elseif ($entity->serieDescription) {
+    $markup = $entity->serieDescription;
+  }
+
+  return $markup;
+}
+
+/**
+ * Process item in batch.
+ *
+ * @param string $id
+ *   Ting Object id to be processed.
+ * @param array $context
+ *   Current operation context.
+ *
+ * @throws \Exception
+ */
+function easyopac_local_material_batch($id, array &$context) {
+  /** @var \TingEntity $entity */
+  $entity = ding_entity_load($id);
+  $field_data = [];
+
+  $field_data['field_lm_cover'] = easyopac_local_material_fetch_cover($id);
+  $field_data['field_lm_object_title'] = $entity->getTitle();
+  $field_data['field_lm_item_id'] = $entity->getId();
+  $field_data['field_lm_object_type'] = $entity->getType();
+  $field_data['field_lm_object_year'] = $entity->getDate();
+  $field_data['field_lm_object_abstract'] = $entity->getAbstract();
+  $field_data['field_lm_object_author'] = !empty($entity->getCreators()) ? $entity->getCreators() : [];
+  $field_data['field_lm_subjects'] = $entity->getSubjects();
+  $field_data['field_lm_holdings_information'] = $entity->getId();
+  $field_data['field_lm_issues'] = $entity->getId();
+  $field_data['field_lm_series'] = easyopac_local_material_get_series($entity);
+  $field_data['field_lm_on_this_site'] = $entity->getId();
+
+  // Collect details fields.
+  $local_material_instance = field_info_instances('node', 'local_material');
+
+  foreach ($local_material_instance as $field_name => $field_instance) {
+    if (preg_match('/field_lmd/', $field_name)) {
+      $field_data[$field_name] = easyopac_local_material_get_record_value($field_name, $entity);
+    }
+  }
+
+  $node = new stdClass();
+  $node->type = "local_material";
+  $node->title = truncate_utf8($entity->getTitle(), '254');
+  $node->language = LANGUAGE_NONE;
+  $node->path = ['alias' => 'ting/local/' . $entity->getId()];
+  node_object_prepare($node);
+  $node->uid = 1;
+
+  // Field-vocabulary mapping.
+  $fv_mapping = [
+    'field_lm_object_author' => 'lm_authors',
+    'field_lm_subjects' => 'lm_subjects',
+    'field_lmd_audience' => 'lm_audience',
+    'field_lmd_subject' => 'lm_subjects',
+  ];
+
+  foreach ($field_data as $fn => $field_datum) {
+    if (!empty($field_datum)) {
+      // Work with taxonomies.
+      if (in_array($fn, array_keys($fv_mapping))) {
+        $prep_array = [];
+        foreach ($field_datum as $item) {
+          // Check taxonomy vocabularies for term.
+          $vocabulary = taxonomy_vocabulary_machine_name_load($fv_mapping[$fn]);
+          $terms = db_select('taxonomy_term_data', 'ttd')
+            ->fields('ttd')
+            ->condition('name', $item)
+            ->execute()
+            ->fetchAll();
+
+          if (!$terms) {
+            $term = new stdClass();
+            $term->name = $item;
+            $term->vid = $vocabulary->vid;
+            taxonomy_term_save($term);
+            $prep_array[] = ['tid' => $term->tid];
+          }
+          else {
+            $prep_array[] = ['tid' => $terms[0]->tid];
+          }
+        }
+
+        $node->{$fn}[LANGUAGE_NONE] = $prep_array;
+      }
+
+      elseif (is_array($field_datum) && !in_array($fn, array_keys($fv_mapping))) {
+        $ret_nontaxonomy = [];
+        foreach ($field_datum as $non_taxonomy) {
+          $ret_nontaxonomy[] = ['value' => $non_taxonomy];
+        }
+
+        $node->{$fn}[LANGUAGE_NONE] = $ret_nontaxonomy;
+      }
+      elseif ($fn == 'field_lm_cover') {
+        $node->{$fn}[LANGUAGE_NONE][0]['fid'] = $field_datum;
+      }
+      else {
+        $node->{$fn}[LANGUAGE_NONE][0]['value'] = $field_datum;
+      }
+    }
+  }
+
+  $node = node_submit($node);
+  node_save($node);
+
+  $context['message'] = "Now processing object with id: $id ...";
+}
+
+/**
+ * Fetch material object cover image and save as managed file.
+ *
+ * @param string $id
+ *   Ting Object id.
+ *
+ * @return string|null
+ *   Local image file id or empty if no cover found.
+ */
+function easyopac_local_material_fetch_cover($id) {
+  $cover = NULL;
+
+  $req = ting_covers_addi_ting_covers([$id => $id]);
+  if (!empty($req)) {
+    $local_covers_directory = 'public://local-covers';
+    file_prepare_directory($local_covers_directory, FILE_CREATE_DIRECTORY);
+
+    $url = reset($req);
+    $image_file = file_save_data(file_get_contents($url), 'public://local-covers/' . $id . '.jpg', FILE_EXISTS_REPLACE);
+    $cover = $image_file->fid;
+  }
+
+  return $cover;
+}
+
+/**
+ * Ting Object import form submit callback.
+ */
+function easyopac_local_material_ting_object_import_form_submit() {
+  $batch = [
+    'operations' => [],
+    'finished' => 'easyopac_local_material_batch_finished',
+    'title' => t('Ting Object Import'),
+    'init_message' => t('Import is starting...'),
+    'progress_message' => t('Processed @current out of @total.'),
+    'error_message' => t('Import has encountered an error.'),
+  ];
+
+  $ids = easyopac_local_material_get_recursively();
+  foreach ($ids as $id) {
+    $batch['operations'][] = ['easyopac_local_material_batch', [$id]];
+  }
+  batch_set($batch);
+  batch_process('admin/import/ting');
+}
+
+/**
+ * Build array of ting object id's for importing.
+ *
+ * @param int $page
+ *   Page number.
+ * @param array $ids_array
+ *   Collection of ting object ids.
+ *
+ * @return array
+ *   Collection of ting object ids.
+ */
+function easyopac_local_material_get_recursively($page = 0, array $ids_array = []) {
+  $keys = '*';
+  $conditions = NULL;
+  $facet_array = [];
+
+  $query = '(' . _ting_search_quote($keys) . ')';
+  $options['numFacets'] = variable_get('ting_search_number_of_facets', 25);
+
+  // Extend query with selected facets.
+  if (isset($conditions['facets']) && $conditions['facets'] != NULL) {
+    $facets = $conditions['facets'];
+    foreach ($facets as $facet) {
+      $facet = explode(':', $facet, 2);
+      if ($facet[0]) {
+        $facet_array[] = $facet[0] . '="' . rawurldecode($facet[1]) . '"';
+      }
+    }
+
+    $query .= ' AND ' . implode(' AND ', $facet_array);
+  }
+
+  if (empty($page)) {
+    $page = 0;
+  }
+
+  // Set results per page.
+  $results_per_page = variable_get('ting_search_results_per_page', 10);
+  $conditions['size'] = 50;
+  if (!empty($conditions['size'])) {
+    $results_per_page = $conditions['size'];
+  }
+
+  // Set sort order.
+  if (!empty($conditions['sort'])) {
+    $options['sort'] = $conditions['sort'];
+  }
+
+  module_load_include('client.inc', 'ting');
+  $search_result = ting_do_search($query, $page + 1, $results_per_page, $options);
+  $total = $search_result->numTotalObjects;
+
+  if (empty($ids_array)) {
+    $ids_array = [];
+  }
+
+  foreach ($search_result->collections as $item) {
+    /** @var \TingCollection $item */
+    $collection = $item->getEntities();
+
+    foreach ($collection as $collection_item) {
+      $ids_array[$collection_item->id] = $collection_item->id;
+    }
+  }
+
+  while (((int) $total == count($ids_array) + 1) == TRUE) {
+    return $ids_array;
+  }
+
+  $page++;
+  return easyopac_local_material_get_recursively($page, $ids_array);
+}
+
+/**
+ * Helper function for retrieving record-field.
+ *
+ * It maps field name to record structure.
+ */
+function easyopac_local_material_record_info() {
+  $ret = [];
+
+  $ret['field_lmd_type'] = 'type';
+  $ret['field_lmd_format'] = ['dc:format'];
+  $ret['field_lmd_available_in'] = ['dcterms:isPartOf'];
+  $ret['field_lmd_language'] = 'language';
+  $ret['field_lmd_subtitle'] = ['dc:language' => 'dkdcplus:subtitles'];
+  $ret['field_lmd_genre'] = ['dc:subject' => 'dkdcplus:genre'];
+  $ret['field_lmd_subject'] = 'subjects';
+  $ret['field_lmd_classification'] = 'classification';
+  $ret['field_lmd_spatial'] = ['dcterms:spatial'];
+  $ret['field_lmd_contributor'] = 'contributors';
+  $ret['field_lmd_contains'] = ['dc:description' => 'dkdcplus:series'];
+  $ret['field_lmd_referenced_by'] = ['dcterms:isReferencedBy'];
+  $ret['field_lmd_description'] = ['dc:description'];
+  $ret['field_lmd_original_title'] = ['dc:source'];
+  $ret['field_lmd_previous_title'] = ['dcterms:replaces'];
+  $ret['field_lmd_later_title'] = ['dcterms:replacedBy'];
+  $ret['field_lmd_isbn_no'] = ['dc:identifier' => 'dkdcplus:ISBN'];
+  $ret['field_lmd_host_publication'] = ['dc:identifier' => 'dcterms:URI'];
+  $ret['field_lmd_version'] = ['dkdcplus:version'];
+  $ret['field_lmd_extent'] = ['dcterms:extent'];
+  $ret['field_lmd_publisher'] = ['dc:publisher'];
+  $ret['field_lmd_rights'] = ['dc:rights'];
+  $ret['field_lmd_audience'] = ['dcterms:audience'];
+  $ret['field_lmd_age'] = ['dcterms:audience' => 'dkdcplus:age'];
+  $ret['field_lmd_pegi_mark'] = ['dcterms:audience' => 'dkdcplus:pegi'];
+
+  return $ret;
+}
+
+/**
+ * Gets the field value of a ting record for a given field type.
+ *
+ * @param string $field_type
+ *   The name of the field that should have its value extracted.
+ * @param \TingEntity $entity
+ *   The ting entity the contains the field and value.
+ *
+ * @return mixed
+ *   The fields value or FALSE if field do not exists or is empty.
+ */
+function easyopac_local_material_get_record_value($field_type, TingEntity $entity) {
+  $rec_info = easyopac_local_material_record_info();
+  $rec = isset($rec_info[$field_type]) ? $rec_info[$field_type] : FALSE;
+  $value = FALSE;
+
+  if ($rec) {
+    // If it's a string simply use it.
+    if (is_string($rec)) {
+      $value = $entity->$rec;
+    }
+
+    if (is_array($rec)) {
+      foreach ($rec as $key => $val) {
+        if ($key) {
+          $value = isset($entity->record[$key][$val]) ? $entity->record[$key][$val] : FALSE;
+        }
+        else {
+          $value = isset($entity->record[$val]['']) ? $entity->record[$val][''] : FALSE;
+        }
+      }
+    }
+  }
+
+  return easyopac_local_material_parse($field_type, $value);
+}
+
+/**
+ * Parse ting entity field value based on field type.
+ *
+ * @param string $field_type
+ *   The name of the field that should have its value extracted.
+ * @param mixed $value
+ *   The fields value.
+ *
+ * @return mixed
+ *   The fields value or FALSE.
+ */
+function easyopac_local_material_parse($field_type, $value) {
+  $ret = $value;
+
+  if ($value) {
+    switch ($field_type) {
+      case 'field_lmd_host_publication':
+        foreach ($value as $val) {
+          $ret[] = l($val, $val);
+        }
+        break;
+    }
+  }
+
+  return $ret;
+}
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function easyopac_local_material_theme_registry_alter(&$theme_registry) {
+  // Defined path to the current module.
+  $path = drupal_get_path('module', 'easyopac_local_material');
+  // Find all .tpl.php files in this module's folder recursively.
+  $template_file_objects = drupal_find_theme_templates($theme_registry, '.tpl.php', $path);
+  // Iterate through all found template file objects.
+  foreach ($template_file_objects as $key => $template_file_object) {
+    // If the template has not already been overridden by a theme.
+    if (!isset($theme_registry[$key]['theme path']) || !preg_match('#/themes/#', $theme_registry[$key]['theme path'])) {
+      // Alter the theme path and template elements.
+      $theme_registry[$key]['theme path'] = $path;
+      $theme_registry[$key] = array_merge($theme_registry[$key], $template_file_object);
+      $theme_registry[$key]['type'] = 'module';
+    }
+
+    if (!empty($theme_registry['facetapi_link_active'])) {
+      $theme_registry['facetapi_link_active']['file'] = drupal_get_path('module', 'easyopac_local_material') . '/easyopac_local_material.module';
+      unset($theme_registry['facetapi_link_active']['includes']);
+      unset($theme_registry['facetapi_link_active']['function']);
+    }
+
+    if (!empty($theme_registry['facetapi_link_inactive'])) {
+      $theme_registry['facetapi_link_inactive']['file'] = drupal_get_path('module', 'easyopac_local_material') . '/easyopac_local_material.module';
+      unset($theme_registry['facetapi_link_inactive']['includes']);
+      unset($theme_registry['facetapi_link_inactive']['function']);
+    }
+  }
+}
+
+/**
+ * Implements hook_process_HOOK().
+ */
+function easyopac_local_material_process_node(&$variables) {
+  unset($variables['content']['group_local_material_right_col']['group_holdings_available']);
+
+  if (!empty($variables['field_lm_series'])) {
+    $series_value = $variables['field_lm_series'][0]['value'];
+    if ($variables['view_mode'] == 'full') {
+      $variables['content']['group_local_material_right_col']['group_local_material_right_c']['field_lm_series'][0]['#markup'] = $series_value;
+    }
+    elseif ($variables['view_mode'] == 'teaser') {
+      $variables['content']['group_materials_right_col_search']['group_info']['field_lm_series'][0]['#markup'] = $series_value;
+    }
+  }
+
+  if ($variables['type'] == 'local_material' && $variables['view_mode'] == 'teaser') {
+    if (!empty($variables['field_lm_object_type'][LANGUAGE_NONE][0]['value'])) {
+      $material_type = $variables['field_lm_object_type'][LANGUAGE_NONE][0]['value'];
+
+      $title_markup = $variables['content']['group_materials_right_col_search']['field_lm_object_title'][0]['#markup'];
+      $title_link = l($title_markup, 'node/' . $variables['node']->nid, ['html' => TRUE]);
+
+      $return = "<span>$material_type:</span>";
+      $return .= "<h2>$title_link</h2>";
+      $variables['content']['group_materials_right_col_search']['field_lm_object_title'][0]['#markup'] = $return;
+    }
+  }
+
+  if (isset($variables['field_lm_object_author'])) {
+    $creators = [];
+    foreach ($variables['field_lm_object_author'] as $i => $creator) {
+      $creators[] = l($creator['taxonomy_term']->name, '/', [
+        'query' => [
+          'f' => [
+            'field_lm_object_author:' . $creator['tid'],
+          ],
+        ],
+      ]);
+    }
+
+    $markup_string = '';
+
+    if (count($creators)) {
+      if (!empty($variables['field_lm_object_year'])) {
+        $markup_string = t('By !author_link (@year)', [
+          '!author_link' => implode(', ', $creators),
+          '@year' => $variables['node']->field_lm_object_year[LANGUAGE_NONE][0]['value'],
+        ]);
+      }
+      else {
+        $markup_string = t('By !author_link', [
+          '!author_link' => implode(', ', $creators),
+        ]);
+      }
+    }
+    elseif (!empty($variables['field_lm_object_year'])) {
+      $markup_string = t('(@year)', ['@year' => $variables['node']->field_lm_object_year[LANGUAGE_NONE][0]['value']]);
+    }
+
+    $container = [
+      '#type' => 'container',
+      '#attributes' => [
+        'class' => [
+          'field',
+          'field-name-field-lm-object-author',
+          'field-label-hidden',
+        ],
+      ],
+      '0' => [
+        '#markup' => $markup_string,
+      ],
+    ];
+
+    if ($variables['view_mode'] == 'teaser') {
+      $weight = $variables['content']['group_materials_right_col_search']['field_lm_object_author']['#weight'];
+      unset($variables['content']['group_materials_right_col_search']['field_lm_object_author'][0]);
+      $container['#weight'] = $weight;
+      $variables['content']['group_materials_right_col_search']['field_lm_object_author'] = $container;
+    }
+    else {
+      $weight = $variables['content']['group_local_material_right_col']['group_local_material_meta']['field_lm_object_year']['#weight'];
+      unset($variables['content']['group_local_material_right_col']['group_local_material_meta']['field_lm_object_year']);
+      $container['#weight'] = $weight;
+      $variables['content']['group_local_material_right_col']['group_local_material_meta']['field_lm_object_author'] = $container;
+    }
+  }
+
+  if ($variables['type'] == 'local_material' && $variables['view_mode'] == 'full') {
+    $content = $variables['content'];
+    $variables['content'] = [];
+    if (!isset($content['group_local_material_left_col'])) {
+      $content['group_local_material_left_col'] = [
+        '#type' => 'container',
+        '#attributes' => [],
+      ];
+    }
+
+    if (!isset($content['group_local_material_right_col']['group_local_material_right_c']['field_lm_object_abstract'])) {
+      $content['group_local_material_right_col']['group_local_material_right_c']['field_lm_object_abstract'] = [
+        '#type' => 'container',
+        '#weight' => 20,
+        '#attributes' => [
+          'class' => [
+            'field',
+            'field-name-field-lm-object-abstract',
+            'field-label-hidden',
+          ],
+        ],
+      ];
+    }
+
+    if (isset($content['group_local_material_left_col']) && $content['group_local_material_left_col']) {
+      $variables['content']['node-local-material'] = [
+        '#prefix' => '<div class="ting-object-wrapper">',
+        '#suffix' => '</div>',
+        'content' => [
+          '#prefix' => '<div class="ting-object-inner-wrapper">',
+          '#suffix' => '</div>',
+          'left_column' => $content['group_local_material_left_col'],
+          'right_column' => $content['group_local_material_right_col'],
+        ],
+      ];
+      unset($content['group_local_material_left_col']);
+    }
+
+    if (isset($content['group_material_details']) && $content['group_material_details']) {
+      $variables['content']['material-details'] = [
+        '#prefix' => '<div class="ting-object-wrapper">',
+        '#suffix' => '</div>',
+        'content' => [
+          '#prefix' => '<div class="ting-object-inner-wrapper">',
+          '#suffix' => '</div>',
+          'details' => $content['group_material_details'],
+        ],
+      ];
+      unset($content['group_material_details']);
+    }
+
+    if (isset($content['content']['ding_availability_holdings'])) {
+
+      $variables['content']['holdings-available'] = [
+        '#prefix' => '<div class="ting-object-wrapper">',
+        '#suffix' => '</div>',
+        'content' => [
+          '#prefix' => '<div class="ting-object-inner-wrapper">',
+          '#suffix' => '</div>',
+          'details' => $content['group_holdings_available'],
+        ],
+      ];
+      unset($content['content']['ding_availability_holdings']);
+    }
+
+    if (isset($content['group_periodical_issues']) && $content['group_periodical_issues']) {
+      $variables['content']['periodical-issues'] = [
+        '#prefix' => '<div class="ting-object-wrapper">',
+        '#suffix' => '</div>',
+        'content' => [
+          '#prefix' => '<div class="ting-object-inner-wrapper">',
+          '#suffix' => '</div>',
+          'details' => $content['group_periodical_issues'],
+        ],
+      ];
+      unset($content['group_periodical_issues']);
+    }
+
+    if (isset($content['group_on_this_site']) && $content['group_on_this_site']) {
+      $variables['content']['on_this_site'] = [
+        '#prefix' => '<div class="ting-object-wrapper">',
+        '#suffix' => '</div>',
+        'content' => [
+          '#prefix' => '<div id="ting_reference" class="ting-object-inner-wrapper">',
+          '#suffix' => '</div>',
+          'details' => $content['group_on_this_site'],
+        ],
+      ];
+      unset($content['group_on_this_site']);
+    }
+
+    if (isset($content['ting_relations']) && $content['ting_relations']) {
+      $variables['content']['ting-relations'] = [
+        'content' => [
+          'details' => $content['ting_relations'],
+        ],
+      ];
+      unset($content['ting_relations']);
+    }
+  }
+}
+
+/**
+ * Implements hook_node_view().
+ */
+function easyopac_local_material_node_view($node, $view_mode, $langcode) {
+  if ($node->type == 'local_material') {
+    if ($view_mode == 'full') {
+      // Object title.
+      $title = $node->content['field_lm_object_title']['#items'][0]['value'];
+      $node->content['field_lm_object_title'] = [
+        '#type' => 'container',
+        '#weight' => $node->content['field_lm_object_title']['#weight'],
+        '#attributes' => [
+          'class' => [
+            'field',
+            'field-name-field-lm-object-title',
+          ],
+        ],
+        'h2' => [
+          '#markup' => $title,
+          '#prefix' => '<h2>',
+          '#suffix' => '</h2>',
+        ],
+      ];
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function easyopac_local_material_process_field(&$variables) {
+  // Make link fields to act as facets link.
+  $link_fields = [
+    'field_lm_subjects',
+    'field_lmd_subject',
+    'field_lmd_audience',
+  ];
+  $element = $variables['element'];
+
+  if (in_array($element['#field_name'], $link_fields)) {
+    $items = $element['#items'];
+    foreach ($items as $delta => $item) {
+      if ($element['#field_name'] == 'field_lmd_subject') {
+        $element['#field_name'] = 'field_lm_subjects';
+      }
+      $link = l($item['taxonomy_term']->name, '/', ['query' => ['f' => [$element['#field_name'] . ':' . $item['tid']]]]);
+      $variables['items'][$delta] = ['#markup' => $link];
+    }
+  }
+}

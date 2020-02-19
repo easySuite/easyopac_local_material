@@ -1,0 +1,406 @@
+@import "../../../../../profiles/ding2/themes/ddbasic/sass/base";
+
+.node-local-material {
+  &.view-mode-full {
+    margin-top: 30px;
+
+    .ting-object-left {
+      @include span-columns(3 of 12);
+      min-height: 1px;
+
+      // Mobile
+      @include media($mobile) {
+        width: auto;
+        float: none;
+      }
+    }
+
+    // Mobile
+    @include media($mobile) {
+      .ting-cover {
+        @include span-columns(4 of 12);
+        float: left;
+
+        &:last-child {
+          margin-right: inherit;
+        }
+      }
+    }
+
+    .ting-object-right {
+      float: right !important;
+      @include span-columns(9 of 12);
+      @include omega();
+
+      @include media($mobile) {
+        width: auto;
+        float: none;
+      }
+    }
+
+    .ting-object-right-meta {
+      float: left;
+
+      @include media($mobile) {
+        @include span-columns(8 of 12);
+        margin-right: 0;
+      }
+    }
+
+    .ting-object-right-content {
+      @include span-columns(5 of 9);
+      margin-bottom: 20px;
+      //float: unset;
+      clear: left;
+
+      @include media($mobile) {
+        width: auto;
+      }
+    }
+
+    .ting-object-right-actions {
+      @include span-columns(3 of 9);
+      @include omega();
+      float: right;
+
+      @include media($mobile) {
+        @include span-columns(9 of 9);
+        margin-top: 20px;
+      }
+    }
+
+    .field-name-field-lm-series {
+      margin-top: 30px;
+    }
+
+    .action-button,
+    .button-see-online {
+
+      padding-right: 15px;
+      margin-bottom: 15px;
+
+      @include media($mobile) {
+        @include span-columns(6);
+        margin-bottom: 10px;
+        padding-right: 0;
+      }
+    }
+
+    .field-name-field-lm-object-type {
+      ul {
+        margin: 0;
+
+        list-style: none;
+
+        li {
+          margin: 0;
+          color: $color-standard-text;
+        }
+      }
+    }
+
+    .field-name-field-lm-object-title {
+      h2 {
+        @include font('display');
+        margin-bottom: 5px;
+      }
+    }
+
+    .field-name-field-lm-object-author {
+      @include font('display-small');
+      color: rgba(38, 38, 38, .54);
+    }
+
+    .field-name-field-lm-object-abstract {
+      margin: 30px 0;
+      padding-bottom: 30px;
+      border-bottom: 1px solid $charcoal-opacity-light;
+    }
+
+    .field-name-field-lm-subjects {
+      margin-bottom: 30px;
+
+      @include media($mobile) {
+        margin-bottom: 0;
+      }
+
+      strong {
+        display: block;
+      }
+
+      a {
+        margin-right: 15px;
+      }
+    }
+
+    .group-holdings-available {
+      display: flex;
+      clear: both;
+      padding: 28px 0 26px;
+      border-top: 1px solid $charcoal-opacity-light;
+    }
+
+    .group-material-details {
+      clear: both;
+
+      .field-group-format-wrapper {
+        margin-top: 20px;
+
+        > .field {
+          .field-label {
+            width: 100px;
+            float: left;
+          }
+
+          > .field-items {
+            padding-left: 100px;
+
+            .ting-material-detail {
+              display: block;
+            }
+          }
+        }
+      }
+    }
+
+    .group-periodical-issues {
+      li {
+        list-style: none;
+        margin: 0;
+      }
+
+      .ding-periodical-fold {
+        @include font('display');
+        @include place-icon(arrow-down);
+        width: 100%;
+        float: left;
+        color: $color-text;
+        padding-bottom: 5px;
+        border-bottom: 1px solid $charcoal-opacity-light;
+        margin-bottom: 15px;
+        cursor: pointer;
+
+        &::after {
+          font-size: 40px;
+          right: 0;
+
+          // Mobile
+          @include media($mobile) {
+            top: -10px;
+          }
+        }
+
+        &:hover {
+          color: $charcoal;
+        }
+      }
+
+      .ding-periodical-container {
+        width: 100%;
+        float: left;
+
+        .ding-periodical-fold {
+          @include font('base');
+          display: block;
+          width: 100%;
+
+          &::after {
+            @extend %icon-arrow-down;
+            top: -10px;
+
+          }
+        }
+
+        &.last {
+          margin-bottom: 40px;
+        }
+      }
+
+      .expanded-periodicals-parent {
+        .ding-periodical-fold {
+          &::after {
+            @extend %icon-arrow-up;
+          }
+        }
+
+        .ding-periodical-container {
+          .ding-periodical-fold {
+            &::after {
+              @extend %icon-arrow-down;
+            }
+          }
+        }
+      }
+
+      .ding-periodical-container {
+        &.expanded-periodicals-parent {
+          .ding-periodical-fold {
+            &::after {
+              @extend %icon-arrow-up;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.view-local-materials-search {
+  .view-content {
+    .item-list {
+      .search-results {
+        list-style: none;
+
+        li.search-result {
+          float: left;
+          width: 100%;
+          margin-bottom: 10px;
+
+          .node-local-material {
+
+            > .inner {
+              @include transition(
+                  background-color $speed $ease,
+                  box-shadow $speed $ease
+              );
+              cursor: auto;
+              width: 100%;
+              float: left;
+              padding: 15px;
+              box-sizing: border-box;
+              background-color: $grey;
+
+              &:hover {
+                background-color: $white;
+                box-shadow: $box-shadow;
+              }
+
+              // Mobile
+              @include media($mobile) {
+                position: relative;
+                padding: 15px 0;
+                background: none;
+                border-top: 1px solid $charcoal-opacity-light;
+                &:hover {
+                  background: none;
+                  box-shadow: none;
+                }
+              }
+
+              .ting-object-left {
+                float: left;
+                width: getColumn(2 of 8) + (getGutter(8) /2);
+                margin-right: getGutter(8) /2;
+                //min-height: 150px;
+
+                &:last-child {
+                  margin-right: getGutter(8) /2;
+                }
+              }
+
+              .ting-object-right {
+                @include span-columns(5 of 8);
+                @include omega();
+              }
+            }
+          }
+
+          .field-name-field-lm-object-title {
+            h2 {
+              @include transition(width $speed $ease);
+              @include font('display-small');
+              width: 100%;
+              margin-bottom: 0;
+              color: $white;
+            }
+          }
+
+          .field-name-field-lm-object-abstract {
+            margin: 20px 0;
+          }
+
+          .field-name-field-lm-series {
+            margin: 20px 0;
+          }
+
+          .field-name-field-lm-object-author {
+            color: rgba(38, 38, 38, .54);
+            margin-bottom: 15px;
+            line-height: 24px;
+          }
+        }
+      }
+    }
+  }
+}
+
+.page-search-node {
+  .secondary-content {
+    .pane-block {
+      border-top: 1px solid rgba(38, 38, 38, .2);
+      margin: 0;
+      padding: 25px 0;
+
+      h2 {
+        float: left;
+        width: 100%;
+        padding: 0;
+        font-family: FaktPro-SemiBold, sans-serif;
+        font-size: 18px;
+        line-height: 24px;
+        margin-bottom: 10px;
+      }
+
+      .pane-content {
+        display: inline-block;
+
+        .facetapi-facetapi-checkbox-links {
+          li {
+            list-style: none;
+            margin-bottom: 15px;
+
+            a {
+              color: #008c6e;
+
+              &:hover {
+                color: #262626;
+              }
+            }
+          }
+        }
+
+        .facetapi-limit-link {
+          @include place-icon(plus, $size: 8px);
+          display: block;
+          float: left;
+          clear: both;
+          margin-top: 10px;
+          padding-left: 42px;
+          color: $charcoal-opacity-dark;
+
+          &::after {
+            @include transition(color $speed $ease);
+            top: 4px;
+            left: 10px;
+          }
+
+          &:hover {
+            color: $color-text-link;
+
+            &::after {
+              color: $color-text-link;
+            }
+          }
+
+          &.open {
+            @include place-icon(minus, $size: 8px);
+
+            &::after {
+              top: 4px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
