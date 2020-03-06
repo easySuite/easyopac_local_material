@@ -246,15 +246,27 @@
 }
 
 .view-local-materials-search {
+  .view-empty {
+    width: 100%;
+    float: left;
+    padding: 40px 0;
+    border-top: 1px solid $charcoal-opacity-light;
+  }
+
   .view-content {
     .item-list {
       .search-results {
         list-style: none;
 
+        .item-list ul li {
+          margin-left: 0 !important;
+        }
+
         li.search-result {
           float: left;
           width: 100%;
           margin-bottom: 10px;
+          margin-left: 0;
 
           .node-local-material {
 
@@ -335,6 +347,34 @@
 }
 
 .page-search-node {
+  // ==========================================================================
+  // Search result count
+  // ==========================================================================
+  .panel-pane.pane-local-search-result-count {
+    .pane-content {
+      margin-bottom: 20px;
+    }
+    .page-title {
+      margin-bottom: 5px;
+    }
+    .search-string,
+    .count {
+      @include font('display-small');
+    }
+
+    .count {
+      color: $charcoal-opacity-dark;
+    }
+  }
+
+  .views-exposed-form .views-exposed-widget {
+    float: none;
+
+    label {
+      display: none;
+    }
+  }
+
   .secondary-content {
     .pane-block {
       border-top: 1px solid rgba(38, 38, 38, .2);
@@ -355,9 +395,14 @@
         display: inline-block;
 
         .facetapi-facetapi-checkbox-links {
+          margin-bottom: 0;
           li {
             list-style: none;
-            margin-bottom: 15px;
+            padding-top: 0;
+
+            .form-item {
+              margin: 0 0 15px;
+            }
 
             a {
               color: #008c6e;
@@ -400,6 +445,36 @@
             }
           }
         }
+      }
+    }
+  }
+
+  // ==========================================================================
+  // Search help
+  // ==========================================================================
+
+  .panel-pane.search-help {
+    width: 100%;
+    float: left;
+    padding: 40px 0;
+    border-top: 1px solid $charcoal-opacity-light;
+    .pane-title {
+      @include font('display-small');
+      color: $charcoal;
+      margin-bottom: 0;
+    }
+    .pane-content {
+      @include span-columns(5 of 8);
+      // Tablet
+      @include media($tablet) {
+        @include span-columns(8);
+      }
+      // Mobile
+      @include media($mobile) {
+        width: 100%;
+      }
+      .button {
+        float: left;
       }
     }
   }

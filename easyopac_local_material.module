@@ -8,6 +8,15 @@
 include_once 'easyopac_local_material.features.inc';
 
 /**
+ * Implements hook_ctools_plugin_directory().
+ */
+function easyopac_local_material_ctools_plugin_directory($owner, $plugin_type) {
+  if ($owner == 'ctools' && !empty($plugin_type)) {
+    return "plugins/$plugin_type";
+  }
+}
+
+/**
  * Implements hook_menu().
  */
 function easyopac_local_material_menu() {
@@ -678,6 +687,28 @@ function easyopac_local_material_process_field(&$variables) {
       }
       $link = l($item['taxonomy_term']->name, '/', ['query' => ['f' => [$element['#field_name'] . ':' . $item['tid']]]]);
       $variables['items'][$delta] = ['#markup' => $link];
+    }
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function easyopac_local_material_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'views_exposed_form' && isset($form_state['view'])) {
+    foreach ($form['items_per_page']['#options'] as $size => $option) {
+      $form['items_per_page']['#options'][$size] = t('Number of search result per page: !num', ['!num' => $size]);
+    }
+  }
+}
+
+/**
+ * Implements hook_views_pre_render().
+ */
+function easyopac_local_material_views_pre_render(&$view) {
+  if ($view->name == 'local_materials_search' && $view->current_display == 'default') {
+    if (empty($view->result)) {
+      $view->exposed_widgets = NULL;
     }
   }
 }

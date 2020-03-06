@@ -31,10 +31,18 @@ function easyopac_local_material_views_default_views() {
   $handler->display->display_options['exposed_form']['options']['submit_button'] = 'Udfør';
   $handler->display->display_options['exposed_form']['options']['reset_button_label'] = 'Gendan';
   $handler->display->display_options['exposed_form']['options']['exposed_sorts_label'] = 'Sortér efter';
+  $handler->display->display_options['exposed_form']['options']['expose_sort_order'] = FALSE;
   $handler->display->display_options['exposed_form']['options']['sort_asc_label'] = 'Stigende';
   $handler->display->display_options['exposed_form']['options']['sort_desc_label'] = 'Faldende';
+  $handler->display->display_options['exposed_form']['options']['autosubmit'] = TRUE;
   $handler->display->display_options['pager']['type'] = 'full';
+  $handler->display->display_options['pager']['options']['items_per_page'] = '10';
+  $handler->display->display_options['pager']['options']['offset'] = '0';
+  $handler->display->display_options['pager']['options']['id'] = '0';
+  $handler->display->display_options['pager']['options']['quantity'] = '9';
+  $handler->display->display_options['pager']['options']['expose']['items_per_page'] = TRUE;
   $handler->display->display_options['pager']['options']['expose']['items_per_page_label'] = 'Antal elementer';
+  $handler->display->display_options['pager']['options']['expose']['items_per_page_options'] = '10, 25, 50';
   $handler->display->display_options['pager']['options']['expose']['items_per_page_options_all_label'] = '- Alle -';
   $handler->display->display_options['pager']['options']['expose']['offset_label'] = 'Forskydning';
   $handler->display->display_options['pager']['options']['tags']['first'] = '« første';
@@ -48,10 +56,36 @@ function easyopac_local_material_views_default_views() {
   $handler->display->display_options['style_options']['class'] = 'search-results';
   $handler->display->display_options['row_plugin'] = 'entity';
   $handler->display->display_options['row_options']['view_mode'] = 'teaser';
+  /* No results behavior: Global: Text area */
+  $handler->display->display_options['empty']['area']['id'] = 'area';
+  $handler->display->display_options['empty']['area']['table'] = 'views';
+  $handler->display->display_options['empty']['area']['field'] = 'area';
+  $handler->display->display_options['empty']['area']['empty'] = TRUE;
+  $handler->display->display_options['empty']['area']['content'] = 'Din søgning desværre ikke gav noget resultat, men vi vil gerne hjælpe dig med at komme videre!
+
+Spørg os på biblioteket eller se kontaktoplysningerne til biblioteket nederst på siden.
+
+Du kan også søge videre på <a href="http://bibliotek.dk/">Bibliotek.dk</a>';
+  $handler->display->display_options['empty']['area']['format'] = 'ding_wysiwyg';
   /* Field: Indexed Node: Node ID */
   $handler->display->display_options['fields']['nid']['id'] = 'nid';
   $handler->display->display_options['fields']['nid']['table'] = 'search_api_index_local_material_index';
   $handler->display->display_options['fields']['nid']['field'] = 'nid';
+  /* Sort criterion: Indexed Node: Audience */
+  $handler->display->display_options['sorts']['field_lmd_audience']['id'] = 'field_lmd_audience';
+  $handler->display->display_options['sorts']['field_lmd_audience']['table'] = 'search_api_index_local_material_index';
+  $handler->display->display_options['sorts']['field_lmd_audience']['field'] = 'field_lmd_audience';
+  $handler->display->display_options['sorts']['field_lmd_audience']['expose']['label'] = 'Audience';
+  /* Sort criterion: Indexed Node: Object Author */
+  $handler->display->display_options['sorts']['field_lm_object_author']['id'] = 'field_lm_object_author';
+  $handler->display->display_options['sorts']['field_lm_object_author']['table'] = 'search_api_index_local_material_index';
+  $handler->display->display_options['sorts']['field_lm_object_author']['field'] = 'field_lm_object_author';
+  $handler->display->display_options['sorts']['field_lm_object_author']['expose']['label'] = 'Object Author';
+  /* Sort criterion: Search: Relevance */
+  $handler->display->display_options['sorts']['search_api_relevance']['id'] = 'search_api_relevance';
+  $handler->display->display_options['sorts']['search_api_relevance']['table'] = 'search_api_index_local_material_index';
+  $handler->display->display_options['sorts']['search_api_relevance']['field'] = 'search_api_relevance';
+  $handler->display->display_options['sorts']['search_api_relevance']['expose']['label'] = 'Relevance';
   /* Contextual filter: Search: Fulltext search */
   $handler->display->display_options['arguments']['search_api_views_fulltext']['id'] = 'search_api_views_fulltext';
   $handler->display->display_options['arguments']['search_api_views_fulltext']['table'] = 'search_api_index_local_material_index';
@@ -111,9 +145,17 @@ function easyopac_local_material_views_default_views() {
     t('‹ forrige'),
     t('næste ›'),
     t('sidste »'),
+    t('Din søgning desværre ikke gav noget resultat, men vi vil gerne hjælpe dig med at komme videre!
+
+Spørg os på biblioteket eller se kontaktoplysningerne til biblioteket nederst på siden.
+
+Du kan også søge videre på <a href="http://bibliotek.dk/">Bibliotek.dk</a>'),
     t('Node ID'),
     t('.'),
     t(','),
+    t('Audience'),
+    t('Object Author'),
+    t('Relevance'),
     t('Alle'),
   );
   $export['local_materials_search'] = $view;

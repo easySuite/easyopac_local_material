@@ -40,19 +40,16 @@ function easyopac_local_material_default_page_manager_handlers_alter(&$data) {
           'access' => array(),
           'configuration' => array(
             'override_title' => 1,
-            'override_title_text' => 'Subject',
+            'override_title_text' => 'Emne',
             'override_title_heading' => 'h2',
           ),
           'cache' => array(),
-          'style' => '',
           'css' => array(),
           'extras' => array(),
-          'position' => 2,
+          'position' => 3,
           'locks' => array(),
           'uuid' => '013526d8-9dca-420c-94bc-44a6ce714438',
         ); /* WAS: '' */
-    $data['search_node_panel_context']->conf['display']->content['new-06e03f81-aacd-462e-be56-7cd9bcd2e5dc']->position = 6; /* WAS: 0 */
-    $data['search_node_panel_context']->conf['display']->content['new-06e03f81-aacd-462e-be56-7cd9bcd2e5dc']->shown = FALSE; /* WAS: TRUE */
     $data['search_node_panel_context']->conf['display']->content['new-15ec2ba0-fa7c-4b73-9622-52aef322d9ff'] = (object) array(
           'pid' => 'new-15ec2ba0-fa7c-4b73-9622-52aef322d9ff',
           'panel' => 'left_sidebar',
@@ -62,14 +59,13 @@ function easyopac_local_material_default_page_manager_handlers_alter(&$data) {
           'access' => array(),
           'configuration' => array(
             'override_title' => 1,
-            'override_title_text' => 'Language',
+            'override_title_text' => 'Sprog',
             'override_title_heading' => 'h2',
           ),
           'cache' => array(),
-          'style' => '',
           'css' => array(),
           'extras' => array(),
-          'position' => 3,
+          'position' => 4,
           'locks' => array(),
           'uuid' => '15ec2ba0-fa7c-4b73-9622-52aef322d9ff',
         ); /* WAS: '' */
@@ -82,14 +78,13 @@ function easyopac_local_material_default_page_manager_handlers_alter(&$data) {
           'access' => array(),
           'configuration' => array(
             'override_title' => 1,
-            'override_title_text' => 'Type',
+            'override_title_text' => 'Materialetype',
             'override_title_heading' => 'h2',
           ),
           'cache' => array(),
-          'style' => '',
           'css' => array(),
           'extras' => array(),
-          'position' => 0,
+          'position' => 1,
           'locks' => array(),
           'uuid' => '2704bc72-3b4d-49cb-9781-5817c49e85a8',
         ); /* WAS: '' */
@@ -102,14 +97,13 @@ function easyopac_local_material_default_page_manager_handlers_alter(&$data) {
           'access' => array(),
           'configuration' => array(
             'override_title' => 1,
-            'override_title_text' => 'Audience',
+            'override_title_text' => 'Målgruppe',
             'override_title_heading' => 'h2',
           ),
           'cache' => array(),
-          'style' => '',
           'css' => array(),
           'extras' => array(),
-          'position' => 4,
+          'position' => 5,
           'locks' => array(),
           'uuid' => '62b2a0ee-b45a-43f1-9425-10fba6056ca8',
         ); /* WAS: '' */
@@ -141,7 +135,6 @@ function easyopac_local_material_default_page_manager_handlers_alter(&$data) {
             'override_title_heading' => 'h2',
           ),
           'cache' => array(),
-          'style' => '',
           'css' => array(),
           'extras' => array(),
           'position' => 0,
@@ -157,16 +150,55 @@ function easyopac_local_material_default_page_manager_handlers_alter(&$data) {
           'access' => array(),
           'configuration' => array(
             'override_title' => 1,
-            'override_title_text' => 'Year',
+            'override_title_text' => 'Årstal',
             'override_title_heading' => 'h2',
           ),
           'cache' => array(),
-          'style' => '',
           'css' => array(),
           'extras' => array(),
-          'position' => 5,
+          'position' => 6,
           'locks' => array(),
           'uuid' => 'a9a2583a-32e3-4eae-ad21-9de81854be56',
+        ); /* WAS: '' */
+    $data['search_node_panel_context']->conf['display']->content['new-aeacf057-37e1-4b53-ad66-174c541b96ef'] = (object) array(
+          'pid' => 'new-aeacf057-37e1-4b53-ad66-174c541b96ef',
+          'panel' => 'main_content',
+          'type' => 'custom',
+          'subtype' => 'custom',
+          'shown' => TRUE,
+          'access' => array(),
+          'configuration' => array(
+            'admin_title' => 'Fandt du',
+            'title' => 'Fandt du ikke hvad du søgte?',
+            'title_heading' => 'h2',
+            'body' => '<p>Spørg os på biblioteket eller få hjælp på <a href="http://biblioteksvagten.dk/" target="_blank">biblioteksvagten.dk</a><br />Du kan også søge videre på <a href="https://bibliotek.dk" target="_blank">bibliotek.dk</a></p>',
+            'format' => 'ding_wysiwyg',
+            'substitute' => 1,
+          ),
+          'cache' => array(),
+          'css' => array(
+            'css_id' => '',
+            'css_class' => 'search-help',
+          ),
+          'extras' => array(),
+          'position' => 1,
+          'locks' => array(),
+          'uuid' => 'aeacf057-37e1-4b53-ad66-174c541b96ef',
+        ); /* WAS: '' */
+    $data['search_node_panel_context']->conf['display']->content['new-e97d9217-0818-416a-80a5-233c205be763'] = (object) array(
+          'pid' => 'new-e97d9217-0818-416a-80a5-233c205be763',
+          'panel' => 'left_sidebar',
+          'type' => 'local_search_result_count',
+          'subtype' => 'local_search_result_count',
+          'shown' => TRUE,
+          'access' => array(),
+          'configuration' => array(),
+          'cache' => array(),
+          'css' => array(),
+          'extras' => array(),
+          'position' => 0,
+          'locks' => array(),
+          'uuid' => 'e97d9217-0818-416a-80a5-233c205be763',
         ); /* WAS: '' */
     $data['search_node_panel_context']->conf['display']->content['new-e9990f4c-8c69-40e2-ba6b-66cfdea5249a'] = (object) array(
           'pid' => 'new-e9990f4c-8c69-40e2-ba6b-66cfdea5249a',
@@ -177,26 +209,28 @@ function easyopac_local_material_default_page_manager_handlers_alter(&$data) {
           'access' => array(),
           'configuration' => array(
             'override_title' => 1,
-            'override_title_text' => 'Authors',
+            'override_title_text' => 'Forfatter',
             'override_title_heading' => 'h2',
           ),
           'cache' => array(),
-          'style' => '',
           'css' => array(),
           'extras' => array(),
-          'position' => 1,
+          'position' => 2,
           'locks' => array(),
           'uuid' => 'e9990f4c-8c69-40e2-ba6b-66cfdea5249a',
         ); /* WAS: '' */
-    $data['search_node_panel_context']->conf['display']->panels['left_sidebar']['1'] = 'new-013526d8-9dca-420c-94bc-44a6ce714438'; /* WAS: 'new-d998c42f-f7b2-4140-91d3-b1e3d049c04c' */
-    $data['search_node_panel_context']->conf['display']->panels['left_sidebar']['2'] = 'new-15ec2ba0-fa7c-4b73-9622-52aef322d9ff'; /* WAS: '' */
-    $data['search_node_panel_context']->conf['display']->panels['left_sidebar']['3'] = 'new-2704bc72-3b4d-49cb-9781-5817c49e85a8'; /* WAS: '' */
-    $data['search_node_panel_context']->conf['display']->panels['left_sidebar']['4'] = 'new-62b2a0ee-b45a-43f1-9425-10fba6056ca8'; /* WAS: '' */
-    $data['search_node_panel_context']->conf['display']->panels['left_sidebar']['5'] = 'new-a9a2583a-32e3-4eae-ad21-9de81854be56'; /* WAS: '' */
-    $data['search_node_panel_context']->conf['display']->panels['left_sidebar']['6'] = 'new-e9990f4c-8c69-40e2-ba6b-66cfdea5249a'; /* WAS: '' */
+    $data['search_node_panel_context']->conf['display']->panels['left_sidebar']['0'] = 'new-e97d9217-0818-416a-80a5-233c205be763'; /* WAS: 'new-06e03f81-aacd-462e-be56-7cd9bcd2e5dc' */
+    $data['search_node_panel_context']->conf['display']->panels['left_sidebar']['1'] = 'new-2704bc72-3b4d-49cb-9781-5817c49e85a8'; /* WAS: 'new-d998c42f-f7b2-4140-91d3-b1e3d049c04c' */
+    $data['search_node_panel_context']->conf['display']->panels['left_sidebar']['2'] = 'new-e9990f4c-8c69-40e2-ba6b-66cfdea5249a'; /* WAS: '' */
+    $data['search_node_panel_context']->conf['display']->panels['left_sidebar']['3'] = 'new-013526d8-9dca-420c-94bc-44a6ce714438'; /* WAS: '' */
+    $data['search_node_panel_context']->conf['display']->panels['left_sidebar']['4'] = 'new-15ec2ba0-fa7c-4b73-9622-52aef322d9ff'; /* WAS: '' */
+    $data['search_node_panel_context']->conf['display']->panels['left_sidebar']['5'] = 'new-62b2a0ee-b45a-43f1-9425-10fba6056ca8'; /* WAS: '' */
+    $data['search_node_panel_context']->conf['display']->panels['left_sidebar']['6'] = 'new-a9a2583a-32e3-4eae-ad21-9de81854be56'; /* WAS: '' */
     $data['search_node_panel_context']->conf['display']->panels['main_content']['0'] = 'new-8ec7fcdf-c3fa-4a98-a361-32e0895d4a58'; /* WAS: 'new-097acc39-287b-48dd-9622-ca3098cc478c' */
+    $data['search_node_panel_context']->conf['display']->panels['main_content']['1'] = 'new-aeacf057-37e1-4b53-ad66-174c541b96ef'; /* WAS: '' */
     $data['search_node_panel_context']->conf['display']->storage_id = 'search_node_panel_context'; /* WAS: '' */
     $data['search_node_panel_context']->conf['display']->storage_type = 'page_manager'; /* WAS: '' */
+    unset($data['search_node_panel_context']->conf['display']->content['new-06e03f81-aacd-462e-be56-7cd9bcd2e5dc']);
     unset($data['search_node_panel_context']->conf['display']->content['new-097acc39-287b-48dd-9622-ca3098cc478c']);
     unset($data['search_node_panel_context']->conf['display']->content['new-d998c42f-f7b2-4140-91d3-b1e3d049c04c']);
   }
@@ -557,7 +591,8 @@ function easyopac_local_material_default_search_api_server() {
           "title" : {
             "table" : "search_api_db_local_material_index_text",
             "type" : "text",
-            "boost" : "1.0"
+            "boost" : "1.0",
+            "column" : "title"
           },
           "field_lm_issues" : {
             "table" : "search_api_db_local_material_index_text",
