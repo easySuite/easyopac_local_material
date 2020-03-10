@@ -696,9 +696,59 @@ function easyopac_local_material_process_field(&$variables) {
  */
 function easyopac_local_material_form_alter(&$form, &$form_state, $form_id) {
   if ($form_id == 'views_exposed_form' && isset($form_state['view'])) {
+
+
+    $form['#tree'] = TRUE;
+    $qp = drupal_get_query_parameters();
+    $action_url = url('/' . current_path(), ['query' => $qp]);
+
+    $form['#action'] = $action_url;
+
     foreach ($form['items_per_page']['#options'] as $size => $option) {
       $form['items_per_page']['#options'][$size] = t('Number of search result per page: !num', ['!num' => $size]);
     }
+
+    $options = [
+      '' => t('Ranking'),
+      'search_api_aggregation_1:asc' => t('Title (Ascending)'),
+      'search_api_aggregation_1:desc' => t('Title (Descending)'),
+      'search_api_aggregation_2:asc' => t('Creator (Ascending)'),
+      'search_api_aggregation_2:desc' => t('Creator (Descending)'),
+      'search_api_aggregation_3:asc' => t('Date (Ascending)'),
+      'search_api_aggregation_3:desc' => t('Date (Descending)'),
+    ];
+
+    foreach ($options as $key => $option) {
+      $options[$key] = t('Sort by: !sort', ['!sort' => $option]);
+    }
+
+    $form['custom_sort'] = [
+      '#type' => 'select',
+      '#options' => $options,
+      '#title' => t('Sort by'),
+    ];
+
+    $form['#submit'][] = 'easyopac_local_material_exposed_form_submit';
+  }
+}
+
+/**
+ * Exposed form custom submit callback.
+ */
+function easyopac_local_material_exposed_form_submit(&$form, &$form_state) {
+  $submitted_sort = $form_state['values']['custom_sort'];
+  if (!empty($submitted_sort)) {
+    $parts = explode(':', $submitted_sort);
+    $default_sort_order = 'DESC';
+
+    if (isset($parts[1])) {
+      $default_sort_order = strtoupper($parts[1]);
+    }
+    $form_state['values']['sort_by'] = $form_state['input']['sort_by'] = $parts[0];
+    $form_state['values']['sort_order'] = $form_state['input']['sort_order'] = strtoupper($parts[1]);
+
+    $form_state['view']->exposed_data['sort_by'] = $parts[0];
+    $form_state['view']->exposed_data['sort_order'] = $default_sort_order;
   }
 }
 
@@ -709,6 +759,53 @@ function easyopac_local_material_views_pre_render(&$view) {
   if ($view->name == 'local_materials_search' && $view->current_display == 'default') {
     if (empty($view->result)) {
       $view->exposed_widgets = NULL;
+    }
+  }
+}
+
+/**
+ * Implements hook_process_HOOK().
+ */
+function easyopac_local_material_process_views_view(&$variables) {
+  $prefix = '';
+  $message = '';
+  $search_result = $variables['view']->result;
+  $limit = 100;
+
+
+  if (isset($search_result) && $limit < $variables['view']->total_rows) {
+    $msg = t('Your search gave more than %s results. Try to search more specific or use the facets to filter the result.');
+    $msg = sprintf($msg, $limit);
+    $message .= '<div class="messages search-field-in-content--message">' . $msg . '</div>';
+  }
+
+  $prefix .= $message;
+
+  $variables['rows'] = $prefix . $variables['rows'];
+}
+
+/**
+ * Rewrite facet block titles.
+ *
+ * @param array $facet
+ *   Facet block data.
+ *
+ * @return string
+ *   Title of the facet block.
+ */
+function ddbasic_facetapi_title(array $facet) {
+  return $facet['title'];
+}
+
+/**
+ * Implements hook_block_view_alter().
+ */
+function easyopac_local_material_block_view_alter(&$data, $block) {
+  if ($block->module == 'facetapi') {
+    $field_name = $data['content']['#facet']['name'];
+
+    if (!isset($data['content'][$field_name]['#items'])) {
+      unset($data['content']);
     }
   }
 }

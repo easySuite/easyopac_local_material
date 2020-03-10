@@ -31,7 +31,6 @@ function easyopac_local_material_views_default_views() {
   $handler->display->display_options['exposed_form']['options']['submit_button'] = 'Udfør';
   $handler->display->display_options['exposed_form']['options']['reset_button_label'] = 'Gendan';
   $handler->display->display_options['exposed_form']['options']['exposed_sorts_label'] = 'Sortér efter';
-  $handler->display->display_options['exposed_form']['options']['expose_sort_order'] = FALSE;
   $handler->display->display_options['exposed_form']['options']['sort_asc_label'] = 'Stigende';
   $handler->display->display_options['exposed_form']['options']['sort_desc_label'] = 'Faldende';
   $handler->display->display_options['exposed_form']['options']['autosubmit'] = TRUE;
@@ -71,21 +70,24 @@ Du kan også søge videre på <a href="http://bibliotek.dk/">Bibliotek.dk</a>';
   $handler->display->display_options['fields']['nid']['id'] = 'nid';
   $handler->display->display_options['fields']['nid']['table'] = 'search_api_index_local_material_index';
   $handler->display->display_options['fields']['nid']['field'] = 'nid';
-  /* Sort criterion: Indexed Node: Audience */
-  $handler->display->display_options['sorts']['field_lmd_audience']['id'] = 'field_lmd_audience';
-  $handler->display->display_options['sorts']['field_lmd_audience']['table'] = 'search_api_index_local_material_index';
-  $handler->display->display_options['sorts']['field_lmd_audience']['field'] = 'field_lmd_audience';
-  $handler->display->display_options['sorts']['field_lmd_audience']['expose']['label'] = 'Audience';
-  /* Sort criterion: Indexed Node: Object Author */
-  $handler->display->display_options['sorts']['field_lm_object_author']['id'] = 'field_lm_object_author';
-  $handler->display->display_options['sorts']['field_lm_object_author']['table'] = 'search_api_index_local_material_index';
-  $handler->display->display_options['sorts']['field_lm_object_author']['field'] = 'field_lm_object_author';
-  $handler->display->display_options['sorts']['field_lm_object_author']['expose']['label'] = 'Object Author';
-  /* Sort criterion: Search: Relevance */
-  $handler->display->display_options['sorts']['search_api_relevance']['id'] = 'search_api_relevance';
-  $handler->display->display_options['sorts']['search_api_relevance']['table'] = 'search_api_index_local_material_index';
-  $handler->display->display_options['sorts']['search_api_relevance']['field'] = 'search_api_relevance';
-  $handler->display->display_options['sorts']['search_api_relevance']['expose']['label'] = 'Relevance';
+  /* Sort criterion: Indexed Node: Author (for sort) */
+  $handler->display->display_options['sorts']['search_api_aggregation_2']['id'] = 'search_api_aggregation_2';
+  $handler->display->display_options['sorts']['search_api_aggregation_2']['table'] = 'search_api_index_local_material_index';
+  $handler->display->display_options['sorts']['search_api_aggregation_2']['field'] = 'search_api_aggregation_2';
+  $handler->display->display_options['sorts']['search_api_aggregation_2']['exposed'] = TRUE;
+  $handler->display->display_options['sorts']['search_api_aggregation_2']['expose']['label'] = 'Author (for sort)';
+  /* Sort criterion: Indexed Node: Title (for sort) */
+  $handler->display->display_options['sorts']['search_api_aggregation_1']['id'] = 'search_api_aggregation_1';
+  $handler->display->display_options['sorts']['search_api_aggregation_1']['table'] = 'search_api_index_local_material_index';
+  $handler->display->display_options['sorts']['search_api_aggregation_1']['field'] = 'search_api_aggregation_1';
+  $handler->display->display_options['sorts']['search_api_aggregation_1']['exposed'] = TRUE;
+  $handler->display->display_options['sorts']['search_api_aggregation_1']['expose']['label'] = 'Title (for sort)';
+  /* Sort criterion: Indexed Node: Year (for sort) */
+  $handler->display->display_options['sorts']['search_api_aggregation_3']['id'] = 'search_api_aggregation_3';
+  $handler->display->display_options['sorts']['search_api_aggregation_3']['table'] = 'search_api_index_local_material_index';
+  $handler->display->display_options['sorts']['search_api_aggregation_3']['field'] = 'search_api_aggregation_3';
+  $handler->display->display_options['sorts']['search_api_aggregation_3']['exposed'] = TRUE;
+  $handler->display->display_options['sorts']['search_api_aggregation_3']['expose']['label'] = 'Year (for sort)';
   /* Contextual filter: Search: Fulltext search */
   $handler->display->display_options['arguments']['search_api_views_fulltext']['id'] = 'search_api_views_fulltext';
   $handler->display->display_options['arguments']['search_api_views_fulltext']['table'] = 'search_api_index_local_material_index';
@@ -93,6 +95,7 @@ Du kan også søge videre på <a href="http://bibliotek.dk/">Bibliotek.dk</a>';
   $handler->display->display_options['arguments']['search_api_views_fulltext']['default_action'] = 'empty';
   $handler->display->display_options['arguments']['search_api_views_fulltext']['exception']['title'] = 'Alle';
   $handler->display->display_options['arguments']['search_api_views_fulltext']['default_argument_type'] = 'fixed';
+  $handler->display->display_options['arguments']['search_api_views_fulltext']['default_argument_skip_url'] = TRUE;
   $handler->display->display_options['arguments']['search_api_views_fulltext']['summary']['format'] = 'default_summary';
   $handler->display->display_options['arguments']['search_api_views_fulltext']['break_phrase'] = 0;
   $handler->display->display_options['arguments']['search_api_views_fulltext']['not'] = 0;
@@ -153,9 +156,9 @@ Du kan også søge videre på <a href="http://bibliotek.dk/">Bibliotek.dk</a>'),
     t('Node ID'),
     t('.'),
     t(','),
-    t('Audience'),
-    t('Object Author'),
-    t('Relevance'),
+    t('Author (for sort)'),
+    t('Title (for sort)'),
+    t('Year (for sort)'),
     t('Alle'),
   );
   $export['local_materials_search'] = $view;

@@ -24,7 +24,7 @@
       });
 
       if (settings.facetapi) {
-        for (var index in settings.facetapi.facets) {
+        for (let index in settings.facetapi.facets) {
           if (null != settings.facetapi.facets[index].limit) {
             // Applies soft limit to the list.
             Drupal.facetapi_local.applyLimit(settings.facetapi.facets[index]);
@@ -49,24 +49,46 @@
       ulId.addClass('facetapi-processed');
 
       // Ensures our limit is zero-based, hides facets over the limit.
-      var limit = settings.limit - 1;
-      ulId.find('li:gt(' + limit + ')').hide();
+      let initLimit = settings.limit - 1;
+      ulId.find('li:gt(' + initLimit + ')').hide();
 
       // Adds "Show more" / "Show fewer" links as appropriate.
       ulId.filter(function () {
-        return $(this).find('li').length > settings.limit;
+        let totalCount = $(this).find('li').length;
+        let settingsLimit = settings.limit;
+        return totalCount > settingsLimit;
       }).each(function () {
-        $('<a href="#" class="facetapi-limit-link"></a>').text(settings.showMoreText).click(function () {
-          if ($(this).hasClass('open')) {
-            $(this).siblings().find('li:gt(' + limit + ')').slideUp();
-            $(this).removeClass('open').text(settings.showMoreText);
+        let facetLength = $(this).find('li').length;
+        let showMoreLink = $('<a href="#" class="facetapi-limit-link show-more"></a>').text(settings.showMoreText);
+        let showLessLink = $('<a href="#" class="facetapi-limit-link show-less"></a>').text(settings.showFewerText);
+
+        showMoreLink.insertAfter($(this)).click(function (e) {
+          e.preventDefault();
+          initLimit += 6;
+          $(this).siblings().find('li:lt(' + initLimit + ')').slideDown('fast');
+          showLessLink.addClass('open').insertAfter($(this));
+
+          if (initLimit >= facetLength) {
+            showMoreLink.hide();
+            showLessLink.show(function () {
+              initLimit = settings.limit - 1;
+            });
           }
           else {
-            $(this).siblings().find('li:gt(' + limit + ')').slideDown();
-            $(this).addClass('open').text(Drupal.t(settings.showFewerText));
+            showMoreLink.show();
+            showLessLink.show();
           }
-          return false;
-        }).insertAfter($(this));
+        });
+
+        showLessLink.click(function (e) {
+          e.preventDefault();
+          let returnCount = settings.limit - 1;
+          $(this).siblings().find('li:gt(' + returnCount + ')').slideUp('fast');
+          showMoreLink.show();
+          showLessLink.hide(function () {
+            initLimit = returnCount;
+          });
+        });
       });
     }
   };

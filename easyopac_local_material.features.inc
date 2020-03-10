@@ -39,7 +39,7 @@ function easyopac_local_material_default_page_manager_handlers_alter(&$data) {
           'shown' => TRUE,
           'access' => array(),
           'configuration' => array(
-            'override_title' => 1,
+            'override_title' => 0,
             'override_title_text' => 'Emne',
             'override_title_heading' => 'h2',
           ),
@@ -58,7 +58,7 @@ function easyopac_local_material_default_page_manager_handlers_alter(&$data) {
           'shown' => TRUE,
           'access' => array(),
           'configuration' => array(
-            'override_title' => 1,
+            'override_title' => 0,
             'override_title_text' => 'Sprog',
             'override_title_heading' => 'h2',
           ),
@@ -77,8 +77,8 @@ function easyopac_local_material_default_page_manager_handlers_alter(&$data) {
           'shown' => TRUE,
           'access' => array(),
           'configuration' => array(
-            'override_title' => 1,
-            'override_title_text' => 'Materialetype',
+            'override_title' => 0,
+            'override_title_text' => '',
             'override_title_heading' => 'h2',
           ),
           'cache' => array(),
@@ -96,7 +96,7 @@ function easyopac_local_material_default_page_manager_handlers_alter(&$data) {
           'shown' => TRUE,
           'access' => array(),
           'configuration' => array(
-            'override_title' => 1,
+            'override_title' => 0,
             'override_title_text' => 'Målgruppe',
             'override_title_heading' => 'h2',
           ),
@@ -149,7 +149,7 @@ function easyopac_local_material_default_page_manager_handlers_alter(&$data) {
           'shown' => TRUE,
           'access' => array(),
           'configuration' => array(
-            'override_title' => 1,
+            'override_title' => 0,
             'override_title_text' => 'Årstal',
             'override_title_heading' => 'h2',
           ),
@@ -208,7 +208,7 @@ function easyopac_local_material_default_page_manager_handlers_alter(&$data) {
           'shown' => TRUE,
           'access' => array(),
           'configuration' => array(
-            'override_title' => 1,
+            'override_title' => 0,
             'override_title_text' => 'Forfatter',
             'override_title_heading' => 'h2',
           ),
@@ -307,7 +307,9 @@ function easyopac_local_material_default_search_api_index() {
         "field_lmd_subject" : { "type" : "list\\u003Cinteger\\u003E", "entity_type" : "taxonomy_term" },
         "field_lmd_subtitle" : { "type" : "text" },
         "field_lmd_type" : { "type" : "text" },
-        "search_api_aggregation_1" : { "type" : "text" },
+        "search_api_aggregation_1" : { "type" : "string" },
+        "search_api_aggregation_2" : { "type" : "string" },
+        "search_api_aggregation_3" : { "type" : "integer" },
         "search_api_language" : { "type" : "string" },
         "title" : { "type" : "text" }
       },
@@ -341,11 +343,24 @@ function easyopac_local_material_default_search_api_index() {
         "search_api_alter_add_aggregation" : {
           "status" : 1,
           "weight" : "0",
-          "settings" : { "fields" : { "search_api_aggregation_1" : {
-                "name" : "New Age Field",
+          "settings" : { "fields" : {
+              "search_api_aggregation_1" : {
+                "name" : "Title (for sort)",
+                "type" : "first_char",
+                "fields" : [ "field_lm_object_title", "field_lmd_age" ],
+                "description" : "A First letter aggregation of the following fields: Object title, Age."
+              },
+              "search_api_aggregation_2" : {
+                "name" : "Author (for sort)",
+                "type" : "first_char",
+                "fields" : [ "field_lm_object_author" ],
+                "description" : "A First letter aggregation of the following fields: Object Author."
+              },
+              "search_api_aggregation_3" : {
+                "name" : "Year (for sort)",
                 "type" : "fulltext",
-                "fields" : [ "field_lmd_age" ],
-                "description" : "A Fulltext aggregation of the following fields: Age."
+                "fields" : [ "field_lm_object_year" ],
+                "description" : "A Fulltext aggregation of the following fields: Object year."
               }
             }
           }
@@ -354,11 +369,13 @@ function easyopac_local_material_default_search_api_index() {
       },
       "processors" : {
         "search_api_case_ignore" : {
-          "status" : 0,
+          "status" : 1,
           "weight" : "0",
           "settings" : { "fields" : {
+              "title" : true,
               "field_lm_issues" : true,
               "field_lm_object_abstract" : true,
+              "field_lm_object_author" : true,
               "field_lm_object_title" : true,
               "field_lm_object_type" : true,
               "field_lm_object_year" : true,
@@ -366,6 +383,7 @@ function easyopac_local_material_default_search_api_index() {
               "field_lm_series" : true,
               "field_lm_ting_relations" : true,
               "field_lmd_age" : true,
+              "field_lmd_audience" : true,
               "field_lmd_available_in" : true,
               "field_lmd_classification" : true,
               "field_lmd_contains" : true,
@@ -386,8 +404,13 @@ function easyopac_local_material_default_search_api_index() {
               "field_lmd_rights" : true,
               "field_lmd_spatial" : true,
               "field_lmd_speech" : true,
+              "field_lmd_subject" : true,
               "field_lmd_subtitle" : true,
-              "field_lmd_type" : true
+              "field_lmd_type" : true,
+              "search_api_aggregation_1" : true,
+              "search_api_aggregation_2" : true,
+              "search_api_aggregation_3" : true,
+              "field_lm_subjects:name" : true
             }
           }
         },
@@ -434,7 +457,7 @@ function easyopac_local_material_default_search_api_index() {
           }
         },
         "search_api_transliteration" : {
-          "status" : 0,
+          "status" : 1,
           "weight" : "15",
           "settings" : { "fields" : {
               "field_lm_issues" : true,
@@ -476,6 +499,7 @@ function easyopac_local_material_default_search_api_index() {
           "weight" : "20",
           "settings" : {
             "fields" : {
+              "title" : true,
               "field_lm_issues" : true,
               "field_lm_object_abstract" : true,
               "field_lm_object_title" : true,
@@ -484,6 +508,7 @@ function easyopac_local_material_default_search_api_index() {
               "field_lm_on_this_site" : true,
               "field_lm_series" : true,
               "field_lm_ting_relations" : true,
+              "field_lmd_age" : true,
               "field_lmd_available_in" : true,
               "field_lmd_classification" : true,
               "field_lmd_contains" : true,
@@ -505,7 +530,8 @@ function easyopac_local_material_default_search_api_index() {
               "field_lmd_spatial" : true,
               "field_lmd_speech" : true,
               "field_lmd_subtitle" : true,
-              "field_lmd_type" : true
+              "field_lmd_type" : true,
+              "field_lm_subjects:name" : true
             },
             "spaces" : "[^[:alnum:]]",
             "ignorable" : "[\\u0027]"
@@ -780,9 +806,10 @@ function easyopac_local_material_default_search_api_server() {
             "boost" : "1.0"
           },
           "search_api_aggregation_1" : {
-            "table" : "search_api_db_local_material_index_text",
-            "type" : "text",
-            "boost" : "1.0"
+            "table" : "search_api_db_local_material_index",
+            "type" : "string",
+            "boost" : "1.0",
+            "column" : "search_api_aggregation_1"
           },
           "field_lm_subjects:tid" : {
             "table" : "search_api_db_local_material_index_field_lm_subjects_tid",
@@ -793,6 +820,18 @@ function easyopac_local_material_default_search_api_server() {
           "field_lm_subjects:name" : {
             "table" : "search_api_db_local_material_index_text",
             "type" : "list\\u003Ctext\\u003E",
+            "boost" : "1.0"
+          },
+          "search_api_aggregation_2" : {
+            "table" : "search_api_db_local_material_index",
+            "column" : "search_api_aggregation_2",
+            "type" : "string",
+            "boost" : "1.0"
+          },
+          "search_api_aggregation_3" : {
+            "table" : "search_api_db_local_material_index",
+            "column" : "search_api_aggregation_3",
+            "type" : "integer",
             "boost" : "1.0"
           }
         }

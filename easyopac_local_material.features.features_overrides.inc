@@ -20,7 +20,7 @@ function easyopac_local_material_features_override_default_overrides() {
       'shown' => TRUE,
       'access' => array(),
       'configuration' => array(
-        'override_title' => 1,
+        'override_title' => 0,
         'override_title_text' => 'Emne',
         'override_title_heading' => 'h2',
       ),
@@ -41,7 +41,7 @@ function easyopac_local_material_features_override_default_overrides() {
       'shown' => TRUE,
       'access' => array(),
       'configuration' => array(
-        'override_title' => 1,
+        'override_title' => 0,
         'override_title_text' => 'Sprog',
         'override_title_heading' => 'h2',
       ),
@@ -60,8 +60,8 @@ function easyopac_local_material_features_override_default_overrides() {
       'shown' => TRUE,
       'access' => array(),
       'configuration' => array(
-        'override_title' => 1,
-        'override_title_text' => 'Materialetype',
+        'override_title' => 0,
+        'override_title_text' => '',
         'override_title_heading' => 'h2',
       ),
       'cache' => array(),
@@ -79,7 +79,7 @@ function easyopac_local_material_features_override_default_overrides() {
       'shown' => TRUE,
       'access' => array(),
       'configuration' => array(
-        'override_title' => 1,
+        'override_title' => 0,
         'override_title_text' => 'Målgruppe',
         'override_title_heading' => 'h2',
       ),
@@ -132,7 +132,7 @@ function easyopac_local_material_features_override_default_overrides() {
       'shown' => TRUE,
       'access' => array(),
       'configuration' => array(
-        'override_title' => 1,
+        'override_title' => 0,
         'override_title_text' => 'Årstal',
         'override_title_heading' => 'h2',
       ),
@@ -192,7 +192,7 @@ function easyopac_local_material_features_override_default_overrides() {
       'shown' => TRUE,
       'access' => array(),
       'configuration' => array(
-        'override_title' => 1,
+        'override_title' => 0,
         'override_title_text' => 'Forfatter',
         'override_title_heading' => 'h2',
       ),
