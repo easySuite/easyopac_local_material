@@ -15,10 +15,10 @@ $options = [
   'absolute' => TRUE,
   'attributes' => [
     'title' => $text,
-    'id' => $original_options['attributes']['id'],
-    'rel' => $original_options['attributes']['rel'],
+    'id' => !empty($original_options['attributes']['id']) ? $original_options['attributes']['id'] : '',
+    'rel' => !empty($original_options['attributes']['rel']) ? $original_options['attributes']['rel'] : '',
   ],
-  'query' => $original_options['query'],
+  'query' => !empty($original_options['query']) ? $original_options['query'] : [],
 ];
 ?>
 
