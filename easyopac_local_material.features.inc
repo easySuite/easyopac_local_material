@@ -281,13 +281,12 @@ function easyopac_local_material_default_search_api_index() {
         "field_lm_subjects" : { "type" : "list\\u003Cinteger\\u003E", "entity_type" : "taxonomy_term" },
         "field_lm_subjects:name" : { "type" : "list\\u003Ctext\\u003E" },
         "field_lm_subjects:tid" : { "type" : "list\\u003Cinteger\\u003E" },
-        "field_lm_ting_relations" : { "type" : "text" },
         "field_lmd_age" : { "type" : "text" },
         "field_lmd_audience" : { "type" : "integer", "entity_type" : "taxonomy_term" },
         "field_lmd_available_in" : { "type" : "list\\u003Ctext\\u003E" },
         "field_lmd_classification" : { "type" : "text" },
         "field_lmd_contains" : { "type" : "list\\u003Ctext\\u003E" },
-        "field_lmd_contributor" : { "type" : "list\\u003Ctext\\u003E" },
+        "field_lmd_contributor" : { "type" : "list\\u003Cinteger\\u003E", "entity_type" : "taxonomy_term" },
         "field_lmd_description" : { "type" : "list\\u003Ctext\\u003E" },
         "field_lmd_extent" : { "type" : "list\\u003Ctext\\u003E" },
         "field_lmd_format" : { "type" : "list\\u003Ctext\\u003E" },
@@ -299,10 +298,10 @@ function easyopac_local_material_default_search_api_index() {
         "field_lmd_original_title" : { "type" : "text" },
         "field_lmd_pegi_mark" : { "type" : "text" },
         "field_lmd_previous_title" : { "type" : "text" },
-        "field_lmd_publisher" : { "type" : "list\\u003Ctext\\u003E" },
+        "field_lmd_publisher" : { "type" : "list\\u003Cinteger\\u003E", "entity_type" : "taxonomy_term" },
         "field_lmd_referenced_by" : { "type" : "text" },
         "field_lmd_rights" : { "type" : "text" },
-        "field_lmd_spatial" : { "type" : "list\\u003Ctext\\u003E" },
+        "field_lmd_spatial" : { "type" : "list\\u003Cinteger\\u003E", "entity_type" : "taxonomy_term" },
         "field_lmd_speech" : { "type" : "text" },
         "field_lmd_subject" : { "type" : "list\\u003Cinteger\\u003E", "entity_type" : "taxonomy_term" },
         "field_lmd_subtitle" : { "type" : "text" },
@@ -381,13 +380,12 @@ function easyopac_local_material_default_search_api_index() {
               "field_lm_object_year" : true,
               "field_lm_on_this_site" : true,
               "field_lm_series" : true,
-              "field_lm_ting_relations" : true,
+              "field_lm_subjects" : true,
               "field_lmd_age" : true,
               "field_lmd_audience" : true,
               "field_lmd_available_in" : true,
               "field_lmd_classification" : true,
               "field_lmd_contains" : true,
-              "field_lmd_contributor" : true,
               "field_lmd_description" : true,
               "field_lmd_extent" : true,
               "field_lmd_format" : true,
@@ -399,7 +397,6 @@ function easyopac_local_material_default_search_api_index() {
               "field_lmd_original_title" : true,
               "field_lmd_pegi_mark" : true,
               "field_lmd_previous_title" : true,
-              "field_lmd_publisher" : true,
               "field_lmd_referenced_by" : true,
               "field_lmd_rights" : true,
               "field_lmd_spatial" : true,
@@ -407,6 +404,8 @@ function easyopac_local_material_default_search_api_index() {
               "field_lmd_subject" : true,
               "field_lmd_subtitle" : true,
               "field_lmd_type" : true,
+              "field_lmd_contributor" : true,
+              "field_lmd_publisher" : true,
               "search_api_aggregation_1" : true,
               "search_api_aggregation_2" : true,
               "search_api_aggregation_3" : true,
@@ -426,12 +425,10 @@ function easyopac_local_material_default_search_api_index() {
               "field_lm_object_year" : true,
               "field_lm_on_this_site" : true,
               "field_lm_series" : true,
-              "field_lm_ting_relations" : true,
               "field_lmd_age" : true,
               "field_lmd_available_in" : true,
               "field_lmd_classification" : true,
               "field_lmd_contains" : true,
-              "field_lmd_contributor" : true,
               "field_lmd_description" : true,
               "field_lmd_extent" : true,
               "field_lmd_format" : true,
@@ -443,13 +440,14 @@ function easyopac_local_material_default_search_api_index() {
               "field_lmd_original_title" : true,
               "field_lmd_pegi_mark" : true,
               "field_lmd_previous_title" : true,
-              "field_lmd_publisher" : true,
               "field_lmd_referenced_by" : true,
               "field_lmd_rights" : true,
               "field_lmd_spatial" : true,
               "field_lmd_speech" : true,
               "field_lmd_subtitle" : true,
-              "field_lmd_type" : true
+              "field_lmd_type" : true,
+              "field_lmd_contributor" : true,
+              "field_lmd_publisher" : true
             },
             "title" : 0,
             "alt" : 1,
@@ -467,12 +465,10 @@ function easyopac_local_material_default_search_api_index() {
               "field_lm_object_year" : true,
               "field_lm_on_this_site" : true,
               "field_lm_series" : true,
-              "field_lm_ting_relations" : true,
               "field_lmd_age" : true,
               "field_lmd_available_in" : true,
               "field_lmd_classification" : true,
               "field_lmd_contains" : true,
-              "field_lmd_contributor" : true,
               "field_lmd_description" : true,
               "field_lmd_extent" : true,
               "field_lmd_format" : true,
@@ -484,13 +480,14 @@ function easyopac_local_material_default_search_api_index() {
               "field_lmd_original_title" : true,
               "field_lmd_pegi_mark" : true,
               "field_lmd_previous_title" : true,
-              "field_lmd_publisher" : true,
               "field_lmd_referenced_by" : true,
               "field_lmd_rights" : true,
               "field_lmd_spatial" : true,
               "field_lmd_speech" : true,
               "field_lmd_subtitle" : true,
-              "field_lmd_type" : true
+              "field_lmd_type" : true,
+              "field_lmd_contributor" : true,
+              "field_lmd_publisher" : true
             }
           }
         },
@@ -507,12 +504,10 @@ function easyopac_local_material_default_search_api_index() {
               "field_lm_object_year" : true,
               "field_lm_on_this_site" : true,
               "field_lm_series" : true,
-              "field_lm_ting_relations" : true,
               "field_lmd_age" : true,
               "field_lmd_available_in" : true,
               "field_lmd_classification" : true,
               "field_lmd_contains" : true,
-              "field_lmd_contributor" : true,
               "field_lmd_description" : true,
               "field_lmd_extent" : true,
               "field_lmd_format" : true,
@@ -524,7 +519,6 @@ function easyopac_local_material_default_search_api_index() {
               "field_lmd_original_title" : true,
               "field_lmd_pegi_mark" : true,
               "field_lmd_previous_title" : true,
-              "field_lmd_publisher" : true,
               "field_lmd_referenced_by" : true,
               "field_lmd_rights" : true,
               "field_lmd_spatial" : true,
@@ -549,12 +543,10 @@ function easyopac_local_material_default_search_api_index() {
               "field_lm_object_year" : true,
               "field_lm_on_this_site" : true,
               "field_lm_series" : true,
-              "field_lm_ting_relations" : true,
               "field_lmd_age" : true,
               "field_lmd_available_in" : true,
               "field_lmd_classification" : true,
               "field_lmd_contains" : true,
-              "field_lmd_contributor" : true,
               "field_lmd_description" : true,
               "field_lmd_extent" : true,
               "field_lmd_format" : true,
@@ -566,13 +558,14 @@ function easyopac_local_material_default_search_api_index() {
               "field_lmd_original_title" : true,
               "field_lmd_pegi_mark" : true,
               "field_lmd_previous_title" : true,
-              "field_lmd_publisher" : true,
               "field_lmd_referenced_by" : true,
               "field_lmd_rights" : true,
               "field_lmd_spatial" : true,
               "field_lmd_speech" : true,
               "field_lmd_subtitle" : true,
-              "field_lmd_type" : true
+              "field_lmd_type" : true,
+              "field_lmd_contributor" : true,
+              "field_lmd_publisher" : true
             },
             "file" : "",
             "stopwords" : "but\\r\\ndid\\r\\nthe this that those\\r\\netc"
@@ -667,11 +660,6 @@ function easyopac_local_material_default_search_api_server() {
             "type" : "list\\u003Cinteger\\u003E",
             "boost" : "1.0"
           },
-          "field_lm_ting_relations" : {
-            "table" : "search_api_db_local_material_index_text",
-            "type" : "text",
-            "boost" : "1.0"
-          },
           "field_lmd_age" : {
             "table" : "search_api_db_local_material_index_text",
             "type" : "text",
@@ -694,11 +682,6 @@ function easyopac_local_material_default_search_api_server() {
             "boost" : "1.0"
           },
           "field_lmd_contains" : {
-            "table" : "search_api_db_local_material_index_text",
-            "type" : "list\\u003Ctext\\u003E",
-            "boost" : "1.0"
-          },
-          "field_lmd_contributor" : {
             "table" : "search_api_db_local_material_index_text",
             "type" : "list\\u003Ctext\\u003E",
             "boost" : "1.0"
@@ -758,11 +741,6 @@ function easyopac_local_material_default_search_api_server() {
             "type" : "text",
             "boost" : "1.0"
           },
-          "field_lmd_publisher" : {
-            "table" : "search_api_db_local_material_index_text",
-            "type" : "list\\u003Ctext\\u003E",
-            "boost" : "1.0"
-          },
           "field_lmd_referenced_by" : {
             "table" : "search_api_db_local_material_index_text",
             "type" : "text",
@@ -771,11 +749,6 @@ function easyopac_local_material_default_search_api_server() {
           "field_lmd_rights" : {
             "table" : "search_api_db_local_material_index_text",
             "type" : "text",
-            "boost" : "1.0"
-          },
-          "field_lmd_spatial" : {
-            "table" : "search_api_db_local_material_index_text",
-            "type" : "list\\u003Ctext\\u003E",
             "boost" : "1.0"
           },
           "field_lmd_speech" : {
@@ -832,6 +805,24 @@ function easyopac_local_material_default_search_api_server() {
             "table" : "search_api_db_local_material_index",
             "column" : "search_api_aggregation_3",
             "type" : "integer",
+            "boost" : "1.0"
+          },
+          "field_lmd_contributor" : {
+            "table" : "search_api_db_local_material_index_field_lmd_contributor",
+            "column" : "value",
+            "type" : "list\\u003Cinteger\\u003E",
+            "boost" : "1.0"
+          },
+          "field_lmd_publisher" : {
+            "table" : "search_api_db_local_material_index_field_lmd_publisher",
+            "column" : "value",
+            "type" : "list\\u003Cinteger\\u003E",
+            "boost" : "1.0"
+          },
+          "field_lmd_spatial" : {
+            "table" : "search_api_db_local_material_index_field_lmd_spatial",
+            "column" : "value",
+            "type" : "list\\u003Cinteger\\u003E",
             "boost" : "1.0"
           }
         }
