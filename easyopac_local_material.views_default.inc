@@ -27,6 +27,9 @@ function easyopac_local_material_views_default_views() {
   $handler->display->display_options['access']['type'] = 'none';
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
+  $handler->display->display_options['query']['options']['search_api_bypass_access'] = 1;
+  $handler->display->display_options['query']['options']['entity_access'] = 0;
+  $handler->display->display_options['query']['options']['parse_mode'] = 'direct';
   $handler->display->display_options['exposed_form']['type'] = 'basic';
   $handler->display->display_options['exposed_form']['options']['submit_button'] = 'Udfør';
   $handler->display->display_options['exposed_form']['options']['reset_button_label'] = 'Gendan';
@@ -107,6 +110,7 @@ Du kan også søge videre på <a href="http://bibliotek.dk/">Bibliotek.dk</a>';
     'field_lm_object_year' => 'field_lm_object_year',
     'field_lm_on_this_site' => 'field_lm_on_this_site',
     'field_lm_series' => 'field_lm_series',
+    'field_lm_subjects:name' => 'field_lm_subjects:name',
     'field_lmd_age' => 'field_lmd_age',
     'field_lmd_available_in' => 'field_lmd_available_in',
     'field_lmd_classification' => 'field_lmd_classification',
@@ -129,6 +133,7 @@ Du kan også søge videre på <a href="http://bibliotek.dk/">Bibliotek.dk</a>';
     'field_lmd_type' => 'field_lmd_type',
     'title' => 'title',
   );
+  $handler->display->display_options['arguments']['search_api_views_fulltext']['conjunction'] = 'OR';
   $translatables['local_materials_search'] = array(
     t('Master'),
     t('mere'),

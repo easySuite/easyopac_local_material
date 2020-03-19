@@ -604,7 +604,7 @@ function easyopac_local_material_default_search_api_server() {
     "options" : {
       "database" : "default:default",
       "min_chars" : "1",
-      "partial_matches" : 0,
+      "partial_matches" : 1,
       "autocomplete" : { "suggest_suffix" : 1, "suggest_words" : 1 },
       "indexes" : { "local_material_index" : {
           "title" : {
