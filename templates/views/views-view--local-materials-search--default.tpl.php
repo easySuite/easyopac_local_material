@@ -26,7 +26,6 @@
  *
  * @ingroup views_templates
  */
-$a = 1;
 ?>
 <div class="<?php print $classes; ?>">
 <?php print render($title_prefix); ?>

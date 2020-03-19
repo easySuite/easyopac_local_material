@@ -806,8 +806,6 @@ function easyopac_local_material_process_field(&$variables) {
  */
 function easyopac_local_material_form_alter(&$form, &$form_state, $form_id) {
   if ($form_id == 'views_exposed_form' && isset($form_state['view'])) {
-
-
     $form['#tree'] = TRUE;
     $qp = drupal_get_query_parameters();
     $action_url = url('/' . current_path(), ['query' => $qp]);
@@ -881,7 +879,6 @@ function easyopac_local_material_process_views_view(&$variables) {
   $message = '';
   $search_result = $variables['view']->result;
   $limit = 100;
-
 
   if (isset($search_result) && $limit < $variables['view']->total_rows) {
     $msg = t('Your search gave more than %s results. Try to search more specific or use the facets to filter the result.');
@@ -995,15 +992,6 @@ function easyopac_local_material_theme($existing, $type, $theme, $path) {
 }
 
 /**
- * Implements hook_url_inbound_alter().
- */
-function easyopac_local_material_url_inbound_alter(&$path, $original_path, $path_language) {
-  //  if (strpos($original_path, 'ting/object/') === 0 && strpos($original_path, 'ting/object/infomedia') !== 0) {
-  //    $path = str_replace('object', 'local', $path);
-  //  }
-}
-
-/**
  * Implements hook_facet_items_alter().
  */
 function easyopac_local_material_facet_items_alter(array &$build, &$settings) {
@@ -1029,15 +1017,14 @@ function easyopac_local_material_facet_items_alter(array &$build, &$settings) {
  */
 function easyopac_local_material_merge_facet_items($field, array $build) {
   $adapter = facetapi_adapter_load('search_api@local_material_index');
-
-  $facets_con = new FacetapiFacet($adapter, facetapi_facet_load($field, 'search_api@local_material_index'));
-  $processor_con = new FacetapiFacetProcessor($facets_con);
-  $processor_con->process();
+  $facets = new FacetapiFacet($adapter, facetapi_facet_load($field, 'search_api@local_material_index'));
+  $processor = new FacetapiFacetProcessor($facets);
+  $processor->process();
 
   $realm = facetapi_realm_load('block');
-  $facets_con->build($realm, $processor_con);
+  $facets->build($realm, $processor);
 
-  $build += $facets_con->getBuild();
+  $build += $facets->getBuild();
 
   return easyopac_local_material_array_orderby($build, '#count', SORT_DESC);
 }

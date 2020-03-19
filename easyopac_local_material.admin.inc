@@ -2,7 +2,6 @@
 
 /**
  * @file
- *
  * EasyOPAC local material module administrative  functionality.
  */
 
