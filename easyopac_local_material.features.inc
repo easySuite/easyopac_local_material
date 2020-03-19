@@ -273,6 +273,7 @@ function easyopac_local_material_default_search_api_index() {
         "field_lm_issues" : { "type" : "text" },
         "field_lm_object_abstract" : { "type" : "text" },
         "field_lm_object_author" : { "type" : "integer", "entity_type" : "taxonomy_term" },
+        "field_lm_object_author:name" : { "type" : "text" },
         "field_lm_object_title" : { "type" : "text" },
         "field_lm_object_type" : { "type" : "text" },
         "field_lm_object_year" : { "type" : "text" },
@@ -287,6 +288,7 @@ function easyopac_local_material_default_search_api_index() {
         "field_lmd_classification" : { "type" : "text" },
         "field_lmd_contains" : { "type" : "list\\u003Ctext\\u003E" },
         "field_lmd_contributor" : { "type" : "list\\u003Cinteger\\u003E", "entity_type" : "taxonomy_term" },
+        "field_lmd_contributor:name" : { "type" : "list\\u003Ctext\\u003E" },
         "field_lmd_description" : { "type" : "list\\u003Ctext\\u003E" },
         "field_lmd_extent" : { "type" : "list\\u003Ctext\\u003E" },
         "field_lmd_format" : { "type" : "list\\u003Ctext\\u003E" },
@@ -299,9 +301,11 @@ function easyopac_local_material_default_search_api_index() {
         "field_lmd_pegi_mark" : { "type" : "text" },
         "field_lmd_previous_title" : { "type" : "text" },
         "field_lmd_publisher" : { "type" : "list\\u003Cinteger\\u003E", "entity_type" : "taxonomy_term" },
+        "field_lmd_publisher:name" : { "type" : "list\\u003Ctext\\u003E" },
         "field_lmd_referenced_by" : { "type" : "text" },
         "field_lmd_rights" : { "type" : "text" },
         "field_lmd_spatial" : { "type" : "list\\u003Cinteger\\u003E", "entity_type" : "taxonomy_term" },
+        "field_lmd_spatial:name" : { "type" : "list\\u003Ctext\\u003E" },
         "field_lmd_speech" : { "type" : "text" },
         "field_lmd_subject" : { "type" : "list\\u003Cinteger\\u003E", "entity_type" : "taxonomy_term" },
         "field_lmd_subtitle" : { "type" : "text" },
@@ -823,6 +827,26 @@ function easyopac_local_material_default_search_api_server() {
             "table" : "search_api_db_local_material_index_field_lmd_spatial",
             "column" : "value",
             "type" : "list\\u003Cinteger\\u003E",
+            "boost" : "1.0"
+          },
+          "field_lm_object_author:name" : {
+            "table" : "search_api_db_local_material_index_text",
+            "type" : "text",
+            "boost" : "1.0"
+          },
+          "field_lmd_contributor:name" : {
+            "table" : "search_api_db_local_material_index_text",
+            "type" : "list\\u003Ctext\\u003E",
+            "boost" : "1.0"
+          },
+          "field_lmd_spatial:name" : {
+            "table" : "search_api_db_local_material_index_text",
+            "type" : "list\\u003Ctext\\u003E",
+            "boost" : "1.0"
+          },
+          "field_lmd_publisher:name" : {
+            "table" : "search_api_db_local_material_index_text",
+            "type" : "list\\u003Ctext\\u003E",
             "boost" : "1.0"
           }
         }
