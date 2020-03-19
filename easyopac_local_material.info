@@ -1,5 +1,5 @@
 name = easyOPAC Local Material
-description = Store and display imported Ting Objects.
+description = "Import ting materials into easyOPAC site."
 core = 7.x
 package = easyOPAC
 dependencies[] = ctools
