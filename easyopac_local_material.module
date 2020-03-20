@@ -282,9 +282,12 @@ function easyopac_local_material_get_relations(TingEntity $entity) {
 
       $vocab = taxonomy_vocabulary_machine_name_load('lm_relations');
 
-      $check_existing = db_select('taxonomy_term_data', 'ttd')
-        ->fields('ttd', ['tid'])
-        ->condition('name', $title)
+      $check_existing = db_select('taxonomy_term_data', 'ttd');
+      $check_existing->join('field_data_field_lm_relation_online', 'ro', 'ttd.tid=ro.entity_id');
+      $check_existing = $check_existing->fields('ttd', ['tid'])
+        ->condition('ttd.name', $title)
+        ->condition('ttd.vid', $vocab->vid)
+        ->condition('ro.field_lm_relation_online_url', $online['url'])
         ->execute()
         ->fetchField();
 
@@ -930,40 +933,40 @@ function easyopac_local_material_preprocess_field(&$variables) {
       $type = $item['taxonomy_term']->field_lm_relation_type[LANGUAGE_NONE][0]['value'];
       $group[$type] = $type;
 
-      $items[] = [
+      $items[$type][] = [
         '#theme' => 'local_relation',
         '#item' => [
           'title' => $item['taxonomy_term']->name,
           'abstract' => $item['taxonomy_term']->field_lm_relation_abstract[LANGUAGE_NONE][0]['value'],
-          'online' => $item['taxonomy_term']->field_lm_relation_online['und'][0],
+          'online' => $item['taxonomy_term']->field_lm_relation_online[LANGUAGE_NONE][0],
         ],
       ];
     }
 
     $group_keys = array_keys($group);
-    $fieldgroup_key = reset($group_keys);
-
     $types = ting_relation_inline();
-    $wrapper = [
-      '#type' => 'container',
-      '#attributes' => [
-        'id' => $fieldgroup_key,
-        'class' => [
-          'ting-object-wrapper',
-          'field-group-format',
-          'field-group-div',
-          'collapsible',
-          'collapsed',
-          'speed-fast',
-          'effect-none',
+    foreach ($group_keys as $group_key) {
+      $wrapper[] = [
+        '#type' => 'container',
+        '#attributes' => [
+          'id' => $group_key,
+          'class' => [
+            'ting-object-wrapper',
+            'field-group-format',
+            'field-group-div',
+            'collapsible',
+            'collapsed',
+            'speed-fast',
+            'effect-none',
+          ],
         ],
-      ],
-      'items' => [
-        '#theme' => 'local_relations',
-        '#title' => "<span class='field-group-format-toggler'>" . $types[$fieldgroup_key] . "</span>",
-        '#items' => $items,
-      ],
-    ];
+        'items' => [
+          '#theme' => 'local_relations',
+          '#title' => "<span class='field-group-format-toggler'>" . $types[$group_key] . "</span>",
+          '#items' => $items[$group_key],
+        ],
+      ];
+    }
 
     unset($variables['items']);
     $variables['items'][0]['#markup'] = drupal_render($wrapper);
