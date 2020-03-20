@@ -1,0 +1,30 @@
+<?php
+
+/**
+ * @file
+ *
+ * Installation and update routine.
+ */
+
+/**
+ * Remove fields that has changed storage type.
+ */
+function easyopac_local_material_update_7001(&$sandbox) {
+  $removable_fields = [
+    'field_lm_ting_relations',
+    'field_lmd_contributor',
+    'field_lmd_publisher',
+    'field_lmd_spatial',
+  ];
+
+  foreach ($removable_fields as $field) {
+    $instance = field_info_instance('node', $field, 'local_material');
+    field_delete_field($field);
+    field_delete_instance($instance);
+  }
+
+  field_purge_batch(1);
+  field_cron();
+
+  features_revert_module('easyopac_local_material');
+}

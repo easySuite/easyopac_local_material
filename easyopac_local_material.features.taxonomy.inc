@@ -25,6 +25,22 @@ function easyopac_local_material_taxonomy_default_vocabularies() {
       'module' => 'taxonomy',
       'weight' => 0,
     ),
+    'lm_relations' => array(
+      'name' => 'LM: Relations',
+      'machine_name' => 'lm_relations',
+      'description' => '',
+      'hierarchy' => 0,
+      'module' => 'taxonomy',
+      'weight' => 0,
+    ),
+    'lm_spatials' => array(
+      'name' => 'LM: Spatials',
+      'machine_name' => 'lm_spatials',
+      'description' => '',
+      'hierarchy' => 0,
+      'module' => 'taxonomy',
+      'weight' => 0,
+    ),
     'lm_subjects' => array(
       'name' => 'LM: Subjects',
       'machine_name' => 'lm_subjects',

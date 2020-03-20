@@ -12,7 +12,7 @@ On the module installation the default frontpage will be changed to match `searc
 
 ## Usage
 After module is installed, the ting objects must be imported manually.
-In order to import ting objects we have to go to `/admin/import/ting` page and click `Start import` button.
+In order to import ting objects we have to go to `admin/config/local-material/import` page and click `Start import` button.
 The import batch will start with progress display. Once import process is finished corresponding message will be shown.
 
 ## Known issues and solutions for them

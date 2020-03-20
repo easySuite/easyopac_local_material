@@ -8,6 +8,7 @@
  * @var string $count
  */
 
+$text = strtolower($text);
 $common_attr_id = "edit-$text";
 $original_options = $options;
 $options = [

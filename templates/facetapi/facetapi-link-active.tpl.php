@@ -28,6 +28,6 @@ $options = [
          name="type[<?php print $text; ?>]" value="<?php print $text; ?>"
          checked="checked" class="form-checkbox">
   <label class="option" for="<?php print $common_attr_id; ?>">
-    <?php print l($text . '<span class="count"> (' . $count . ')</span>', $path, $options); ?>
+    <?php print l(strtolower($text) . '<span class="count"> (' . $count . ')</span>', $path, $options); ?>
   </label>
 </div>
