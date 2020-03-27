@@ -275,7 +275,7 @@ function easyopac_local_material_default_search_api_index() {
         "field_lm_object_author" : { "type" : "integer", "entity_type" : "taxonomy_term" },
         "field_lm_object_author:name" : { "type" : "text" },
         "field_lm_object_title" : { "type" : "text" },
-        "field_lm_object_type" : { "type" : "text" },
+        "field_lm_object_type" : { "type" : "integer", "entity_type" : "taxonomy_term" },
         "field_lm_object_year" : { "type" : "text" },
         "field_lm_on_this_site" : { "type" : "text" },
         "field_lm_series" : { "type" : "text" },
@@ -284,8 +284,8 @@ function easyopac_local_material_default_search_api_index() {
         "field_lm_subjects:tid" : { "type" : "list\\u003Cinteger\\u003E" },
         "field_lmd_age" : { "type" : "text" },
         "field_lmd_audience" : { "type" : "integer", "entity_type" : "taxonomy_term" },
-        "field_lmd_available_in" : { "type" : "list\\u003Ctext\\u003E" },
-        "field_lmd_classification" : { "type" : "text" },
+        "field_lmd_available_in" : { "type" : "integer", "entity_type" : "node" },
+        "field_lmd_classification" : { "type" : "integer", "entity_type" : "taxonomy_term" },
         "field_lmd_contains" : { "type" : "list\\u003Ctext\\u003E" },
         "field_lmd_contributor" : { "type" : "list\\u003Cinteger\\u003E", "entity_type" : "taxonomy_term" },
         "field_lmd_contributor:name" : { "type" : "list\\u003Ctext\\u003E" },
@@ -294,7 +294,7 @@ function easyopac_local_material_default_search_api_index() {
         "field_lmd_format" : { "type" : "list\\u003Ctext\\u003E" },
         "field_lmd_genre" : { "type" : "text" },
         "field_lmd_isbn_no" : { "type" : "list\\u003Ctext\\u003E" },
-        "field_lmd_language" : { "type" : "text" },
+        "field_lmd_language" : { "type" : "list\\u003Cinteger\\u003E", "entity_type" : "taxonomy_term" },
         "field_lmd_later_title" : { "type" : "text" },
         "field_lmd_musician" : { "type" : "text" },
         "field_lmd_original_title" : { "type" : "text" },
@@ -309,7 +309,7 @@ function easyopac_local_material_default_search_api_index() {
         "field_lmd_speech" : { "type" : "text" },
         "field_lmd_subject" : { "type" : "list\\u003Cinteger\\u003E", "entity_type" : "taxonomy_term" },
         "field_lmd_subtitle" : { "type" : "text" },
-        "field_lmd_type" : { "type" : "text" },
+        "field_lmd_type" : { "type" : "integer", "entity_type" : "taxonomy_term" },
         "search_api_aggregation_1" : { "type" : "string" },
         "search_api_aggregation_2" : { "type" : "string" },
         "search_api_aggregation_3" : { "type" : "integer" },
@@ -639,9 +639,10 @@ function easyopac_local_material_default_search_api_server() {
             "boost" : "1.0"
           },
           "field_lm_object_type" : {
-            "table" : "search_api_db_local_material_index_text",
-            "type" : "text",
-            "boost" : "1.0"
+            "table" : "search_api_db_local_material_index",
+            "type" : "integer",
+            "boost" : "1.0",
+            "column" : "field_lm_object_type_1"
           },
           "field_lm_object_year" : {
             "table" : "search_api_db_local_material_index_text",
@@ -676,14 +677,16 @@ function easyopac_local_material_default_search_api_server() {
             "boost" : "1.0"
           },
           "field_lmd_available_in" : {
-            "table" : "search_api_db_local_material_index_text",
-            "type" : "list\\u003Ctext\\u003E",
-            "boost" : "1.0"
+            "table" : "search_api_db_local_material_index",
+            "type" : "integer",
+            "boost" : "1.0",
+            "column" : "field_lmd_available_in_1"
           },
           "field_lmd_classification" : {
-            "table" : "search_api_db_local_material_index_text",
-            "type" : "text",
-            "boost" : "1.0"
+            "table" : "search_api_db_local_material_index",
+            "type" : "integer",
+            "boost" : "1.0",
+            "column" : "field_lmd_classification_1"
           },
           "field_lmd_contains" : {
             "table" : "search_api_db_local_material_index_text",
@@ -716,9 +719,10 @@ function easyopac_local_material_default_search_api_server() {
             "boost" : "1.0"
           },
           "field_lmd_language" : {
-            "table" : "search_api_db_local_material_index_text",
-            "type" : "text",
-            "boost" : "1.0"
+            "table" : "search_api_db_local_material_index_field_lmd_language",
+            "type" : "list\\u003Cinteger\\u003E",
+            "boost" : "1.0",
+            "column" : "field_lmd_language_1"
           },
           "field_lmd_later_title" : {
             "table" : "search_api_db_local_material_index_text",
@@ -772,9 +776,10 @@ function easyopac_local_material_default_search_api_server() {
             "boost" : "1.0"
           },
           "field_lmd_type" : {
-            "table" : "search_api_db_local_material_index_text",
-            "type" : "text",
-            "boost" : "1.0"
+            "table" : "search_api_db_local_material_index",
+            "type" : "integer",
+            "boost" : "1.0",
+            "column" : "field_lmd_type_1"
           },
           "search_api_language" : {
             "table" : "search_api_db_local_material_index",

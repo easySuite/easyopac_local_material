@@ -40,7 +40,7 @@ function easyopac_local_material_field_group_info() {
       'formatter' => 'collapsed',
     ),
   );
-  $field_groups['group_holdings_available|node|local_material|default'] = $field_group;
+  $field_groups[''] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -73,7 +73,7 @@ function easyopac_local_material_field_group_info() {
       'formatter' => 'open',
     ),
   );
-  $field_groups['group_info|node|local_material|teaser'] = $field_group;
+  $field_groups[''] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -90,28 +90,28 @@ function easyopac_local_material_field_group_info() {
     'children' => array(
       0 => 'field_lmd_age',
       1 => 'field_lmd_audience',
-      2 => 'field_lmd_available_in',
-      3 => 'field_lmd_classification',
-      4 => 'field_lmd_contains',
-      5 => 'field_lmd_description',
-      6 => 'field_lmd_extent',
-      7 => 'field_lmd_format',
-      8 => 'field_lmd_genre',
-      9 => 'field_lmd_host_publication',
-      10 => 'field_lmd_isbn_no',
-      11 => 'field_lmd_language',
-      12 => 'field_lmd_later_title',
-      13 => 'field_lmd_musician',
-      14 => 'field_lmd_original_title',
-      15 => 'field_lmd_pegi_mark',
-      16 => 'field_lmd_previous_title',
-      17 => 'field_lmd_referenced_by',
-      18 => 'field_lmd_rights',
-      19 => 'field_lmd_speech',
-      20 => 'field_lmd_subject',
-      21 => 'field_lmd_subtitle',
-      22 => 'field_lmd_type',
-      23 => 'field_lmd_version',
+      2 => 'field_lmd_contains',
+      3 => 'field_lmd_description',
+      4 => 'field_lmd_extent',
+      5 => 'field_lmd_format',
+      6 => 'field_lmd_genre',
+      7 => 'field_lmd_host_publication',
+      8 => 'field_lmd_isbn_no',
+      9 => 'field_lmd_later_title',
+      10 => 'field_lmd_musician',
+      11 => 'field_lmd_original_title',
+      12 => 'field_lmd_pegi_mark',
+      13 => 'field_lmd_previous_title',
+      14 => 'field_lmd_referenced_by',
+      15 => 'field_lmd_rights',
+      16 => 'field_lmd_speech',
+      17 => 'field_lmd_subject',
+      18 => 'field_lmd_subtitle',
+      19 => 'field_lmd_version',
+      20 => 'field_lmd_type',
+      21 => 'field_lmd_language',
+      22 => 'field_lmd_classification',
+      23 => 'field_lmd_available_in',
       24 => 'field_lmd_contributor',
       25 => 'field_lmd_publisher',
       26 => 'field_lmd_spatial',
@@ -127,7 +127,7 @@ function easyopac_local_material_field_group_info() {
       ),
     ),
   );
-  $field_groups['group_lm_material_details|node|local_material|form'] = $field_group;
+  $field_groups[''] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -159,7 +159,7 @@ function easyopac_local_material_field_group_info() {
       'formatter' => 'open',
     ),
   );
-  $field_groups['group_local_material_left_col|node|local_material|default'] = $field_group;
+  $field_groups[''] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -176,8 +176,8 @@ function easyopac_local_material_field_group_info() {
     'children' => array(
       0 => 'field_lm_object_author',
       1 => 'field_lm_object_title',
-      2 => 'field_lm_object_type',
-      3 => 'field_lm_object_year',
+      2 => 'field_lm_object_year',
+      3 => 'field_lm_object_type',
     ),
     'format_type' => 'div',
     'format_settings' => array(
@@ -194,7 +194,7 @@ function easyopac_local_material_field_group_info() {
       'formatter' => 'open',
     ),
   );
-  $field_groups['group_local_material_meta|node|local_material|default'] = $field_group;
+  $field_groups[''] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -230,7 +230,7 @@ function easyopac_local_material_field_group_info() {
       'formatter' => 'open',
     ),
   );
-  $field_groups['group_local_material_right_col|node|local_material|default'] = $field_group;
+  $field_groups[''] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -264,7 +264,7 @@ function easyopac_local_material_field_group_info() {
       'formatter' => 'open',
     ),
   );
-  $field_groups['group_local_material_right_c|node|local_material|default'] = $field_group;
+  $field_groups[''] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -281,27 +281,27 @@ function easyopac_local_material_field_group_info() {
     'children' => array(
       0 => 'field_lmd_age',
       1 => 'field_lmd_audience',
-      2 => 'field_lmd_available_in',
-      3 => 'field_lmd_classification',
-      4 => 'field_lmd_contains',
-      5 => 'field_lmd_description',
-      6 => 'field_lmd_extent',
-      7 => 'field_lmd_format',
-      8 => 'field_lmd_genre',
-      9 => 'field_lmd_isbn_no',
-      10 => 'field_lmd_language',
-      11 => 'field_lmd_later_title',
-      12 => 'field_lmd_musician',
-      13 => 'field_lmd_original_title',
-      14 => 'field_lmd_pegi_mark',
-      15 => 'field_lmd_previous_title',
-      16 => 'field_lmd_referenced_by',
-      17 => 'field_lmd_rights',
-      18 => 'field_lmd_speech',
-      19 => 'field_lmd_subject',
-      20 => 'field_lmd_subtitle',
-      21 => 'field_lmd_type',
-      22 => 'field_lmd_version',
+      2 => 'field_lmd_contains',
+      3 => 'field_lmd_description',
+      4 => 'field_lmd_extent',
+      5 => 'field_lmd_format',
+      6 => 'field_lmd_genre',
+      7 => 'field_lmd_isbn_no',
+      8 => 'field_lmd_later_title',
+      9 => 'field_lmd_musician',
+      10 => 'field_lmd_original_title',
+      11 => 'field_lmd_pegi_mark',
+      12 => 'field_lmd_previous_title',
+      13 => 'field_lmd_referenced_by',
+      14 => 'field_lmd_rights',
+      15 => 'field_lmd_speech',
+      16 => 'field_lmd_subject',
+      17 => 'field_lmd_subtitle',
+      18 => 'field_lmd_version',
+      19 => 'field_lmd_type',
+      20 => 'field_lmd_language',
+      21 => 'field_lmd_classification',
+      22 => 'field_lmd_available_in',
       23 => 'field_lmd_contributor',
       24 => 'field_lmd_publisher',
     ),
@@ -320,7 +320,7 @@ function easyopac_local_material_field_group_info() {
       'formatter' => 'collapsed',
     ),
   );
-  $field_groups['group_material_details|node|local_material|default'] = $field_group;
+  $field_groups[''] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -352,7 +352,7 @@ function easyopac_local_material_field_group_info() {
       'formatter' => 'open',
     ),
   );
-  $field_groups['group_materials_left_col_search|node|local_material|teaser'] = $field_group;
+  $field_groups[''] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -386,7 +386,7 @@ function easyopac_local_material_field_group_info() {
       'formatter' => 'open',
     ),
   );
-  $field_groups['group_materials_right_col_search|node|local_material|teaser'] = $field_group;
+  $field_groups[''] = $field_group;
 
   // Translatables
   // Included for use with string extractors like potx.

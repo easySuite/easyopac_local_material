@@ -68,75 +68,73 @@ function easyopac_local_material_ting_object_import_form() {
 }
 
 /**
- * Ting Objects import batch.
- *
- * @param bool $success
- *   Batch operation status.
- * @param array $operations
- *   Set of started operations to be processed.
+ * Ting Object import form submit callback.
  */
-function easyopac_local_material_batch_finished($success, array $operations) {
-  if ($success) {
-    drupal_set_message('Import is complete!');
+function easyopac_local_material_ting_object_import_form_submit() {
+  $operations = [];
+
+  // Starting nodes import process.
+  $ids = easyopac_local_material_get_recursively();
+  foreach ($ids as $id) {
+    $operations[] = ['easyopac_local_material_batch', [$id]];
   }
-  else {
-    $error_operation = reset($operations);
-    $message = t('An error occurred while processing %error_operation with arguments: @arguments', [
-      '%error_operation' => $error_operation[0],
-      '@arguments' => print_r($error_operation[1], TRUE),
-    ]);
-    drupal_set_message($message, 'error');
-    drupal_set_message(l(t('Run again'), 'admin/config/local-material/import'));
-  }
+
+  // Run preprocess of isPartOf values.
+  $operations[] = ['easyopac_local_material_ispartof_process', []];
+
+  $batch = [
+    'operations' => $operations,
+    'finished' => 'easyopac_local_material_batch_finished',
+    'title' => t('Ting Object Import'),
+    'init_message' => t('Import is starting...'),
+    'progress_message' => t('Processed @current out of @total.'),
+    'error_message' => t('Import has encountered an error.'),
+  ];
+
+  batch_set($batch);
+  batch_process('admin/config/local-material/import');
 }
 
 /**
- * Processing of series field.
+ * Process isPartOf.
  *
- * @param object $entity
- *   Ting Object entity.
- *
- * @return string|null
- *   Prepared series field data for saving in database or empty string.
+ * @param array $context
+ *   Batch context.
  */
-function easyopac_local_material_get_series($entity) {
-  $markup = '';
-  if ($entity->serieTitle) {
-    foreach ($entity->serieTitle as $title) {
-      $series_number = isset($title[1]) ? ' : ' . check_plain($title[1]) . ' ; ' : ' ; ';
-      $markup = $title[0] . $series_number;
+function easyopac_local_material_ispartof_process(&$context) {
+  $context['message'] = "Processing of isPartOf.";
+  $asd = db_select('node', 'n')
+    ->fields('n', ['nid', 'title']);
+  $asd->join('field_data_field_lm_item_id', 'flid', 'n.nid=flid.entity_id');
+  $asd->addField('flid', 'field_lm_item_id_value', 'item_id');
+  $asd->condition('n.type', 'local_material');
+  $results = $asd->execute()->fetchAll();
+
+  foreach ($results as $result) {
+    /** @var \TingEntity $entity */
+    $entity = ding_entity_load($result->item_id);
+
+    $is_part_of = $entity->getIsPartOf();
+
+    if (!empty($is_part_of)) {
+      $parse_title = explode(',', reset($is_part_of));
+
+      $nid = db_select('node', 'n')
+        ->fields('n', ['nid'])
+        ->condition('title', $parse_title[0])
+        ->execute()
+        ->fetchField();
+
+      if (!empty($nid)) {
+        $node = node_load($result->nid);
+        $node_wrapper = entity_metadata_wrapper('node', $node);
+        $node_wrapper->field_lmd_available_in->set($nid);
+        $node_wrapper->save();
+      }
     }
-  }
-  elseif ($entity->serieDescription) {
-    $markup = $entity->serieDescription;
-  }
 
-  return $markup;
-}
-
-/**
- * Get authors.
- *
- * @param \TingEntity $entity
- *   Processed entity.
- *
- * @return array
- *   Material's registered authors.
- */
-function easyopac_local_material_get_authors(TingEntity $entity) {
-  $type = $entity->getType();
-  $creators = [];
-  if (isset($entity->record['dc:creator'])) {
-    $creators = $entity->record['dc:creator'];
+    $context['results'][] = $result->nid;
   }
-  $authors = [];
-  if ($type != 'Ebog' && !empty($creators) && isset($creators['dkdcplus:aut'])) {
-    foreach ($creators['dkdcplus:aut'] as $creator) {
-      $authors[] = $creator;
-    }
-  }
-
-  return $authors;
 }
 
 /**
@@ -157,7 +155,7 @@ function easyopac_local_material_batch($id, array &$context) {
   $field_data['field_lm_cover'] = easyopac_local_material_fetch_cover($id);
   $field_data['field_lm_object_title'] = $entity->getTitle();
   $field_data['field_lm_item_id'] = $entity->getId();
-  $field_data['field_lm_object_type'] = $entity->getType();
+  $field_data['field_lm_object_type'][] = $entity->getType();
   $field_data['field_lm_object_year'] = $entity->getDate();
   $field_data['field_lm_object_abstract'] = $entity->getAbstract();
   $field_data['field_lm_object_author'] = easyopac_local_material_get_authors($entity);
@@ -194,6 +192,10 @@ function easyopac_local_material_batch($id, array &$context) {
     'field_lmd_publisher' => 'lm_authors',
     'field_lmd_contributor' => 'lm_authors',
     'field_lmd_spatial' => 'lm_spatials',
+    'field_lm_object_type' => 'lm_object_types',
+    'field_lmd_type' => 'lm_object_types',
+    'field_lmd_language' => 'lm_languages',
+    'field_lmd_classification' => 'lm_classifications',
   ];
 
   foreach ($field_data as $fn => $field_datum) {
@@ -248,7 +250,266 @@ function easyopac_local_material_batch($id, array &$context) {
   $node = node_submit($node);
   node_save($node);
 
-  $context['message'] = "Now processing object with id: $id ...";
+  $context['message'] = "Processed object with id: $id ...";
+}
+
+/**
+ * Ting Objects import batch.
+ *
+ * @param bool $success
+ *   Batch operation status.
+ * @param array $operations
+ *   Set of started operations to be processed.
+ */
+function easyopac_local_material_batch_finished($success, array $operations) {
+  if ($success) {
+    drupal_set_message('Import is complete!');
+  }
+  else {
+    $error_operation = reset($operations);
+    $message = t('An error occurred while processing %error_operation with arguments: @arguments', [
+      '%error_operation' => $error_operation[0],
+      '@arguments' => print_r($error_operation[1], TRUE),
+    ]);
+    drupal_set_message($message, 'error');
+    drupal_set_message(l(t('Run again'), 'admin/config/local-material/import'));
+  }
+}
+
+/**
+ * Build array of ting object id's for importing.
+ *
+ * @param int $page
+ *   Page number.
+ * @param array $ids_array
+ *   Collection of ting object ids.
+ *
+ * @return array
+ *   Collection of ting object ids.
+ */
+function easyopac_local_material_get_recursively($page = 0, array $ids_array = []) {
+  $keys = '*';
+  $conditions = NULL;
+  $facet_array = [];
+
+  $query = '(' . _ting_search_quote($keys) . ')';
+  $options['numFacets'] = variable_get('ting_search_number_of_facets', 25);
+
+  // Extend query with selected facets.
+  if (isset($conditions['facets']) && $conditions['facets'] != NULL) {
+    $facets = $conditions['facets'];
+    foreach ($facets as $facet) {
+      $facet = explode(':', $facet, 2);
+      if ($facet[0]) {
+        $facet_array[] = $facet[0] . '="' . rawurldecode($facet[1]) . '"';
+      }
+    }
+
+    $query .= ' AND ' . implode(' AND ', $facet_array);
+  }
+
+  if (empty($page)) {
+    $page = 0;
+  }
+
+  // Set results per page.
+  $results_per_page = variable_get('ting_search_results_per_page', 10);
+  $conditions['size'] = 50;
+  if (!empty($conditions['size'])) {
+    $results_per_page = $conditions['size'];
+  }
+
+  // Set sort order.
+  if (!empty($conditions['sort'])) {
+    $options['sort'] = $conditions['sort'];
+  }
+
+  module_load_include('client.inc', 'ting');
+  $search_result = ting_do_search($query, $page + 1, $results_per_page, $options);
+  $total = $search_result->numTotalObjects;
+
+  if (empty($ids_array)) {
+    $ids_array = [];
+  }
+
+  foreach ($search_result->collections as $item) {
+    /** @var \TingCollection $item */
+    $collection = $item->getEntities();
+
+    foreach ($collection as $collection_item) {
+      $ids_array[] = $collection_item->id;
+    }
+  }
+
+  while (((int) $total == count($ids_array) + 1) == TRUE) {
+    return $ids_array;
+  }
+
+  $page++;
+  return easyopac_local_material_get_recursively($page, $ids_array);
+}
+
+/**
+ * Helper function for retrieving record-field.
+ *
+ * It maps field name to record structure.
+ */
+function easyopac_local_material_record_info() {
+  $ret = [];
+
+  $ret['field_lmd_type'] = 'type';
+  $ret['field_lmd_format'] = ['dc:format'];
+  $ret['field_lmd_language'] = 'language';
+  $ret['field_lmd_subtitle'] = ['dc:language' => 'dkdcplus:subtitles'];
+  $ret['field_lmd_genre'] = ['dc:subject' => 'dkdcplus:genre'];
+  $ret['field_lmd_subject'] = 'subjects';
+  $ret['field_lmd_classification'] = 'classification';
+  $ret['field_lmd_spatial'] = ['dcterms:spatial' => 'dkdcplus:DBCF'];
+  $ret['field_lmd_contributor'] = 'contributors';
+  $ret['field_lmd_contains'] = ['dc:description' => 'dkdcplus:series'];
+  $ret['field_lmd_referenced_by'] = ['dcterms:isReferencedBy'];
+  $ret['field_lmd_description'] = ['dc:description'];
+  $ret['field_lmd_original_title'] = ['dc:source'];
+  $ret['field_lmd_previous_title'] = ['dcterms:replaces'];
+  $ret['field_lmd_later_title'] = ['dcterms:replacedBy'];
+  $ret['field_lmd_isbn_no'] = ['dc:identifier' => 'dkdcplus:ISBN'];
+  $ret['field_lmd_host_publication'] = ['dc:identifier' => 'dcterms:URI'];
+  $ret['field_lmd_version'] = ['dkdcplus:version'];
+  $ret['field_lmd_extent'] = ['dcterms:extent'];
+  $ret['field_lmd_publisher'] = ['dc:publisher'];
+  $ret['field_lmd_rights'] = ['dc:rights'];
+  $ret['field_lmd_audience'] = ['dcterms:audience'];
+  $ret['field_lmd_age'] = ['dcterms:audience' => 'dkdcplus:age'];
+  $ret['field_lmd_pegi_mark'] = ['dcterms:audience' => 'dkdcplus:pegi'];
+
+  return $ret;
+}
+
+/**
+ * Gets the field value of a ting record for a given field type.
+ *
+ * @param string $field_type
+ *   The name of the field that should have its value extracted.
+ * @param \TingEntity $entity
+ *   The ting entity the contains the field and value.
+ *
+ * @return mixed
+ *   The fields value or FALSE if field do not exists or is empty.
+ */
+function easyopac_local_material_get_record_value($field_type, TingEntity $entity) {
+  $rec_info = easyopac_local_material_record_info();
+  $rec = isset($rec_info[$field_type]) ? $rec_info[$field_type] : FALSE;
+  $value = FALSE;
+
+  if ($rec) {
+    // If it's a string simply use it.
+    if (is_string($rec)) {
+      $value = $entity->$rec;
+    }
+
+    if (is_array($rec)) {
+      foreach ($rec as $key => $val) {
+        if ($key) {
+          $value = isset($entity->record[$key][$val]) ? $entity->record[$key][$val] : FALSE;
+        }
+        else {
+          $value = isset($entity->record[$val]['']) ? $entity->record[$val][''] : FALSE;
+        }
+      }
+    }
+  }
+
+  return easyopac_local_material_parse($field_type, $value);
+}
+
+/**
+ * Parse ting entity field value based on field type.
+ *
+ * @param string $field_type
+ *   The name of the field that should have its value extracted.
+ * @param mixed $value
+ *   The fields value.
+ *
+ * @return mixed
+ *   The fields value or FALSE.
+ */
+function easyopac_local_material_parse($field_type, $value) {
+  $ret = $value;
+
+  if ($value) {
+    switch ($field_type) {
+      case 'field_lmd_host_publication':
+        foreach ($value as $val) {
+          $ret[] = l($val, $val);
+        }
+        break;
+
+      case 'field_lmd_type':
+      case 'field_lmd_classification':
+        $ret = [$value];
+        break;
+
+      case 'field_lmd_language':
+        $langs = [];
+        $values = explode(',', $value);
+        foreach ($values as $item) {
+          $langs[] = trim($item);
+        }
+        $ret = $langs;
+        break;
+    }
+  }
+
+  return $ret;
+}
+
+/**
+ * Processing of series field.
+ *
+ * @param object $entity
+ *   Ting Object entity.
+ *
+ * @return string|null
+ *   Prepared series field data for saving in database or empty string.
+ */
+function easyopac_local_material_get_series($entity) {
+  $markup = '';
+  if ($entity->serieTitle) {
+    foreach ($entity->serieTitle as $title) {
+      $series_number = isset($title[1]) ? ' : ' . check_plain($title[1]) . ' ; ' : ' ; ';
+      $markup = $title[0] . $series_number;
+    }
+  }
+  elseif ($entity->serieDescription) {
+    $markup = $entity->serieDescription;
+  }
+
+  return $markup;
+}
+
+/**
+ * Get authors.
+ *
+ * @param \TingEntity $entity
+ *   Processed entity.
+ *
+ * @return array
+ *   Material's registered authors.
+ */
+function easyopac_local_material_get_authors(TingEntity $entity) {
+  $type = $entity->getType();
+  $creators = [];
+  if (isset($entity->record['dc:creator'])) {
+    $creators = $entity->record['dc:creator'];
+  }
+  $authors = [];
+  if ($type != 'Ebog' && !empty($creators) && isset($creators['dkdcplus:aut'])) {
+    foreach ($creators['dkdcplus:aut'] as $creator) {
+      $authors[] = $creator;
+    }
+  }
+
+  return $authors;
 }
 
 /**
@@ -337,201 +598,6 @@ function easyopac_local_material_fetch_cover($id) {
 }
 
 /**
- * Ting Object import form submit callback.
- */
-function easyopac_local_material_ting_object_import_form_submit() {
-  $batch = [
-    'operations' => [],
-    'finished' => 'easyopac_local_material_batch_finished',
-    'title' => t('Ting Object Import'),
-    'init_message' => t('Import is starting...'),
-    'progress_message' => t('Processed @current out of @total.'),
-    'error_message' => t('Import has encountered an error.'),
-  ];
-
-  $ids = easyopac_local_material_get_recursively();
-  foreach ($ids as $id) {
-    $batch['operations'][] = ['easyopac_local_material_batch', [$id]];
-  }
-  batch_set($batch);
-  batch_process('admin/config/local-material/import');
-}
-
-/**
- * Build array of ting object id's for importing.
- *
- * @param int $page
- *   Page number.
- * @param array $ids_array
- *   Collection of ting object ids.
- *
- * @return array
- *   Collection of ting object ids.
- */
-function easyopac_local_material_get_recursively($page = 0, array $ids_array = []) {
-  $keys = '*';
-  $conditions = NULL;
-  $facet_array = [];
-
-  $query = '(' . _ting_search_quote($keys) . ')';
-  $options['numFacets'] = variable_get('ting_search_number_of_facets', 25);
-
-  // Extend query with selected facets.
-  if (isset($conditions['facets']) && $conditions['facets'] != NULL) {
-    $facets = $conditions['facets'];
-    foreach ($facets as $facet) {
-      $facet = explode(':', $facet, 2);
-      if ($facet[0]) {
-        $facet_array[] = $facet[0] . '="' . rawurldecode($facet[1]) . '"';
-      }
-    }
-
-    $query .= ' AND ' . implode(' AND ', $facet_array);
-  }
-
-  if (empty($page)) {
-    $page = 0;
-  }
-
-  // Set results per page.
-  $results_per_page = variable_get('ting_search_results_per_page', 10);
-  $conditions['size'] = 50;
-  if (!empty($conditions['size'])) {
-    $results_per_page = $conditions['size'];
-  }
-
-  // Set sort order.
-  if (!empty($conditions['sort'])) {
-    $options['sort'] = $conditions['sort'];
-  }
-
-  module_load_include('client.inc', 'ting');
-  $search_result = ting_do_search($query, $page + 1, $results_per_page, $options);
-  $total = $search_result->numTotalObjects;
-
-  if (empty($ids_array)) {
-    $ids_array = [];
-  }
-
-  foreach ($search_result->collections as $item) {
-    /** @var \TingCollection $item */
-    $collection = $item->getEntities();
-
-    foreach ($collection as $collection_item) {
-      $ids_array[] = $collection_item->id;
-    }
-  }
-
-  while (((int) $total == count($ids_array) + 1) == TRUE) {
-    return $ids_array;
-  }
-
-  $page++;
-  return easyopac_local_material_get_recursively($page, $ids_array);
-}
-
-/**
- * Helper function for retrieving record-field.
- *
- * It maps field name to record structure.
- */
-function easyopac_local_material_record_info() {
-  $ret = [];
-
-  $ret['field_lmd_type'] = 'type';
-  $ret['field_lmd_format'] = ['dc:format'];
-  $ret['field_lmd_available_in'] = ['dcterms:isPartOf'];
-  $ret['field_lmd_language'] = 'language';
-  $ret['field_lmd_subtitle'] = ['dc:language' => 'dkdcplus:subtitles'];
-  $ret['field_lmd_genre'] = ['dc:subject' => 'dkdcplus:genre'];
-  $ret['field_lmd_subject'] = 'subjects';
-  $ret['field_lmd_classification'] = 'classification';
-  $ret['field_lmd_spatial'] = ['dcterms:spatial' => 'dkdcplus:DBCF'];
-  $ret['field_lmd_contributor'] = 'contributors';
-  $ret['field_lmd_contains'] = ['dc:description' => 'dkdcplus:series'];
-  $ret['field_lmd_referenced_by'] = ['dcterms:isReferencedBy'];
-  $ret['field_lmd_description'] = ['dc:description'];
-  $ret['field_lmd_original_title'] = ['dc:source'];
-  $ret['field_lmd_previous_title'] = ['dcterms:replaces'];
-  $ret['field_lmd_later_title'] = ['dcterms:replacedBy'];
-  $ret['field_lmd_isbn_no'] = ['dc:identifier' => 'dkdcplus:ISBN'];
-  $ret['field_lmd_host_publication'] = ['dc:identifier' => 'dcterms:URI'];
-  $ret['field_lmd_version'] = ['dkdcplus:version'];
-  $ret['field_lmd_extent'] = ['dcterms:extent'];
-  $ret['field_lmd_publisher'] = ['dc:publisher'];
-  $ret['field_lmd_rights'] = ['dc:rights'];
-  $ret['field_lmd_audience'] = ['dcterms:audience'];
-  $ret['field_lmd_age'] = ['dcterms:audience' => 'dkdcplus:age'];
-  $ret['field_lmd_pegi_mark'] = ['dcterms:audience' => 'dkdcplus:pegi'];
-
-  return $ret;
-}
-
-/**
- * Gets the field value of a ting record for a given field type.
- *
- * @param string $field_type
- *   The name of the field that should have its value extracted.
- * @param \TingEntity $entity
- *   The ting entity the contains the field and value.
- *
- * @return mixed
- *   The fields value or FALSE if field do not exists or is empty.
- */
-function easyopac_local_material_get_record_value($field_type, TingEntity $entity) {
-  $rec_info = easyopac_local_material_record_info();
-  $rec = isset($rec_info[$field_type]) ? $rec_info[$field_type] : FALSE;
-  $value = FALSE;
-
-  if ($rec) {
-    // If it's a string simply use it.
-    if (is_string($rec)) {
-      $value = $entity->$rec;
-    }
-
-    if (is_array($rec)) {
-      foreach ($rec as $key => $val) {
-        if ($key) {
-          $value = isset($entity->record[$key][$val]) ? $entity->record[$key][$val] : FALSE;
-        }
-        else {
-          $value = isset($entity->record[$val]['']) ? $entity->record[$val][''] : FALSE;
-        }
-      }
-    }
-  }
-
-  return easyopac_local_material_parse($field_type, $value);
-}
-
-/**
- * Parse ting entity field value based on field type.
- *
- * @param string $field_type
- *   The name of the field that should have its value extracted.
- * @param mixed $value
- *   The fields value.
- *
- * @return mixed
- *   The fields value or FALSE.
- */
-function easyopac_local_material_parse($field_type, $value) {
-  $ret = $value;
-
-  if ($value) {
-    switch ($field_type) {
-      case 'field_lmd_host_publication':
-        foreach ($value as $val) {
-          $ret[] = l($val, $val);
-        }
-        break;
-    }
-  }
-
-  return $ret;
-}
-
-/**
  * Implements hook_theme_registry_alter().
  */
 function easyopac_local_material_theme_registry_alter(&$theme_registry) {
@@ -580,8 +646,10 @@ function easyopac_local_material_process_node(&$variables) {
   }
 
   if ($variables['type'] == 'local_material' && $variables['view_mode'] == 'teaser') {
-    if (!empty($variables['field_lm_object_type'][LANGUAGE_NONE][0]['value'])) {
-      $material_type = $variables['field_lm_object_type'][LANGUAGE_NONE][0]['value'];
+    if (!empty($variables['field_lm_object_type'][LANGUAGE_NONE][0]['tid'])) {
+      $type_term = $variables['field_lm_object_type'][LANGUAGE_NONE][0]['tid'];
+      $material_type = taxonomy_term_load($type_term);
+      $material_type = $material_type->name;
 
       $title_markup = $variables['content']['group_materials_right_col_search']['field_lm_object_title'][0]['#markup'];
       $title_link = l($title_markup, 'node/' . $variables['node']->nid, ['html' => TRUE]);
@@ -1053,4 +1121,37 @@ function easyopac_local_material_array_orderby() {
   $args[] = &$data;
   call_user_func_array('array_multisort', $args);
   return array_pop($args);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function easyopac_local_material_form_local_material_node_form_alter(&$form, &$form_state, $form_id) {
+  // Hide fields.
+  $fields = [
+    'field_lm_holdings_information',
+    'field_lm_issues',
+    'field_lm_on_this_site',
+    'field_lmd_subject',
+    'field_lmd_type',
+  ];
+
+  foreach ($fields as $field) {
+    $form[$field]['#access'] = FALSE;
+  }
+}
+
+/**
+ * Implements hook_node_submit().
+ */
+function easyopac_local_material_node_submit($node, $form, &$form_state) {
+  $fields = [
+    'field_lm_object_type' => 'field_lmd_type',
+    'field_lm_subjects' => 'field_lmd_subject',
+  ];
+
+  foreach ($fields as $base => $secondary) {
+    $value = $form_state['values'][$base];
+    $node->$secondary = $value;
+  }
 }

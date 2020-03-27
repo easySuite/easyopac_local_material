@@ -377,9 +377,9 @@ function easyopac_local_material_field_default_field_instances() {
       ),
       'default' => array(
         'label' => 'hidden',
-        'module' => 'text',
+        'module' => 'taxonomy',
         'settings' => array(),
-        'type' => 'text_default',
+        'type' => 'taxonomy_term_reference_plain',
         'weight' => 22,
       ),
       'teaser' => array(
@@ -399,11 +399,11 @@ function easyopac_local_material_field_default_field_instances() {
     ),
     'widget' => array(
       'active' => 1,
-      'module' => 'text',
+      'module' => 'options',
       'settings' => array(
         'size' => 60,
       ),
-      'type' => 'text_textfield',
+      'type' => 'options_select',
       'weight' => 4,
     ),
   );
@@ -742,9 +742,11 @@ function easyopac_local_material_field_default_field_instances() {
       ),
       'default' => array(
         'label' => 'inline',
-        'module' => 'text',
-        'settings' => array(),
-        'type' => 'text_default',
+        'module' => 'entityreference',
+        'settings' => array(
+          'link' => FALSE,
+        ),
+        'type' => 'entityreference_label',
         'weight' => 22,
       ),
       'teaser' => array(
@@ -764,11 +766,13 @@ function easyopac_local_material_field_default_field_instances() {
     ),
     'widget' => array(
       'active' => 1,
-      'module' => 'text',
+      'module' => 'entityreference',
       'settings' => array(
+        'match_operator' => 'CONTAINS',
+        'path' => '',
         'size' => 60,
       ),
-      'type' => 'text_textfield',
+      'type' => 'entityreference_autocomplete',
       'weight' => 33,
     ),
   );
@@ -788,9 +792,9 @@ function easyopac_local_material_field_default_field_instances() {
       ),
       'default' => array(
         'label' => 'inline',
-        'module' => 'text',
+        'module' => 'taxonomy',
         'settings' => array(),
-        'type' => 'text_default',
+        'type' => 'taxonomy_term_reference_plain',
         'weight' => 28,
       ),
       'teaser' => array(
@@ -810,11 +814,12 @@ function easyopac_local_material_field_default_field_instances() {
     ),
     'widget' => array(
       'active' => 1,
-      'module' => 'text',
+      'module' => 'taxonomy',
       'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
         'size' => 60,
       ),
-      'type' => 'text_textfield',
+      'type' => 'taxonomy_autocomplete',
       'weight' => 39,
     ),
   );
@@ -1218,9 +1223,9 @@ function easyopac_local_material_field_default_field_instances() {
       ),
       'default' => array(
         'label' => 'inline',
-        'module' => 'text',
+        'module' => 'taxonomy',
         'settings' => array(),
-        'type' => 'text_default',
+        'type' => 'taxonomy_term_reference_plain',
         'weight' => 23,
       ),
       'teaser' => array(
@@ -1240,11 +1245,12 @@ function easyopac_local_material_field_default_field_instances() {
     ),
     'widget' => array(
       'active' => 1,
-      'module' => 'text',
+      'module' => 'taxonomy',
       'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
         'size' => 60,
       ),
-      'type' => 'text_textfield',
+      'type' => 'taxonomy_autocomplete',
       'weight' => 34,
     ),
   );
@@ -1815,9 +1821,9 @@ function easyopac_local_material_field_default_field_instances() {
       ),
       'default' => array(
         'label' => 'inline',
-        'module' => 'text',
+        'module' => 'taxonomy',
         'settings' => array(),
-        'type' => 'text_default',
+        'type' => 'taxonomy_term_reference_plain',
         'weight' => 20,
       ),
       'teaser' => array(
@@ -1837,11 +1843,11 @@ function easyopac_local_material_field_default_field_instances() {
     ),
     'widget' => array(
       'active' => 1,
-      'module' => 'text',
+      'module' => 'options',
       'settings' => array(
         'size' => 60,
       ),
-      'type' => 'text_textfield',
+      'type' => 'options_select',
       'weight' => 31,
     ),
   );
