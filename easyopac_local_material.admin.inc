@@ -42,6 +42,9 @@ function easyopac_local_material_cleanup_form_submit($form, &$form_state) {
     'lm_relations',
     'lm_subjects',
     'lm_spatials',
+    'lm_object_types',
+    'lm_languages',
+    'lm_classifications',
   ];
 
   $vids = [];
@@ -61,7 +64,9 @@ function easyopac_local_material_cleanup_form_submit($form, &$form_state) {
   }
 
   foreach ($fids as $j => $fid) {
-    file_delete(file_load($fid));
+    if ($fid instanceof stdClass) {
+      file_delete(file_load($fid));
+    }
   }
 
   foreach ($terms as $term) {

@@ -28,3 +28,26 @@ function easyopac_local_material_update_7001(&$sandbox) {
 
   features_revert_module('easyopac_local_material');
 }
+
+/**
+ * Remove fields that has changed storage type.
+ */
+function easyopac_local_material_update_7002(&$sandbox) {
+  $removable_fields = [
+    'field_lm_object_type',
+    'field_lmd_type',
+    'field_lmd_language',
+    'field_lmd_available_in',
+  ];
+
+  foreach ($removable_fields as $field) {
+    $instance = field_info_instance('node', $field, 'local_material');
+    field_delete_field($field);
+    field_delete_instance($instance);
+  }
+
+  field_purge_batch(1);
+  field_cron();
+
+  features_revert_module('easyopac_local_material');
+}
