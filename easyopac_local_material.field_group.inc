@@ -40,7 +40,7 @@ function easyopac_local_material_field_group_info() {
       'formatter' => 'collapsed',
     ),
   );
-  $field_groups[''] = $field_group;
+  $field_groups['group_holdings_available|node|local_material|default'] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -73,7 +73,7 @@ function easyopac_local_material_field_group_info() {
       'formatter' => 'open',
     ),
   );
-  $field_groups[''] = $field_group;
+  $field_groups['group_info|node|local_material|teaser'] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -127,7 +127,7 @@ function easyopac_local_material_field_group_info() {
       ),
     ),
   );
-  $field_groups[''] = $field_group;
+  $field_groups['group_lm_material_details|node|local_material|form'] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -159,7 +159,7 @@ function easyopac_local_material_field_group_info() {
       'formatter' => 'open',
     ),
   );
-  $field_groups[''] = $field_group;
+  $field_groups['group_local_material_left_col|node|local_material|default'] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -194,7 +194,7 @@ function easyopac_local_material_field_group_info() {
       'formatter' => 'open',
     ),
   );
-  $field_groups[''] = $field_group;
+  $field_groups['group_local_material_meta|node|local_material|default'] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -230,7 +230,7 @@ function easyopac_local_material_field_group_info() {
       'formatter' => 'open',
     ),
   );
-  $field_groups[''] = $field_group;
+  $field_groups['group_local_material_right_col|node|local_material|default'] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -264,7 +264,7 @@ function easyopac_local_material_field_group_info() {
       'formatter' => 'open',
     ),
   );
-  $field_groups[''] = $field_group;
+  $field_groups['group_local_material_right_c|node|local_material|default'] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -320,7 +320,7 @@ function easyopac_local_material_field_group_info() {
       'formatter' => 'collapsed',
     ),
   );
-  $field_groups[''] = $field_group;
+  $field_groups['group_material_details|node|local_material|default'] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -352,7 +352,7 @@ function easyopac_local_material_field_group_info() {
       'formatter' => 'open',
     ),
   );
-  $field_groups[''] = $field_group;
+  $field_groups['group_materials_left_col_search|node|local_material|teaser'] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -386,7 +386,7 @@ function easyopac_local_material_field_group_info() {
       'formatter' => 'open',
     ),
   );
-  $field_groups[''] = $field_group;
+  $field_groups['group_materials_right_col_search|node|local_material|teaser'] = $field_group;
 
   // Translatables
   // Included for use with string extractors like potx.
