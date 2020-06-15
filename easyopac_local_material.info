@@ -1,6 +1,7 @@
 name = easyOPAC Local Material
 description = Import ting materials into easyOPAC site.
 core = 7.x
+release = 7.x-6.0.2
 package = easyOPAC
 dependencies[] = ctools
 dependencies[] = ding_base
