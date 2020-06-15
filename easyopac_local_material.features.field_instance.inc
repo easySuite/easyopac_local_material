@@ -146,7 +146,7 @@ function easyopac_local_material_field_default_field_instances() {
         'label' => 'hidden',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 3,
+        'weight' => 4,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -377,9 +377,9 @@ function easyopac_local_material_field_default_field_instances() {
       ),
       'default' => array(
         'label' => 'hidden',
-        'module' => 'text',
+        'module' => 'taxonomy',
         'settings' => array(),
-        'type' => 'text_default',
+        'type' => 'taxonomy_term_reference_plain',
         'weight' => 22,
       ),
       'teaser' => array(
@@ -399,11 +399,11 @@ function easyopac_local_material_field_default_field_instances() {
     ),
     'widget' => array(
       'active' => 1,
-      'module' => 'text',
+      'module' => 'options',
       'settings' => array(
         'size' => 60,
       ),
-      'type' => 'text_textfield',
+      'type' => 'options_select',
       'weight' => 4,
     ),
   );
@@ -597,7 +597,7 @@ function easyopac_local_material_field_default_field_instances() {
     'bundle' => 'local_material',
     'default_value' => NULL,
     'deleted' => 0,
-    'description' => 'ting_relations',
+    'description' => '',
     'display' => array(
       'alternative_layout_full' => array(
         'label' => 'above',
@@ -607,33 +607,34 @@ function easyopac_local_material_field_default_field_instances() {
       ),
       'default' => array(
         'label' => 'hidden',
+        'module' => 'taxonomy',
         'settings' => array(),
-        'type' => 'hidden',
-        'weight' => 4,
+        'type' => 'taxonomy_term_reference_plain',
+        'weight' => 47,
       ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 25,
+        'weight' => 0,
       ),
     ),
     'entity_type' => 'node',
     'field_name' => 'field_lm_ting_relations',
-    'label' => 'Ting relations',
+    'label' => 'LM: Ting relations',
     'required' => 0,
     'settings' => array(
-      'text_processing' => 0,
       'user_register_form' => FALSE,
     ),
     'widget' => array(
-      'active' => 1,
-      'module' => 'text',
+      'active' => 0,
+      'module' => 'taxonomy',
       'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
         'size' => 60,
       ),
-      'type' => 'text_textfield',
-      'weight' => 13,
+      'type' => 'taxonomy_autocomplete',
+      'weight' => 58,
     ),
   );
 
@@ -655,7 +656,7 @@ function easyopac_local_material_field_default_field_instances() {
         'module' => 'text',
         'settings' => array(),
         'type' => 'text_default',
-        'weight' => 45,
+        'weight' => 43,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -701,7 +702,7 @@ function easyopac_local_material_field_default_field_instances() {
         'module' => 'taxonomy',
         'settings' => array(),
         'type' => 'taxonomy_term_reference_link',
-        'weight' => 44,
+        'weight' => 42,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -741,9 +742,11 @@ function easyopac_local_material_field_default_field_instances() {
       ),
       'default' => array(
         'label' => 'inline',
-        'module' => 'text',
-        'settings' => array(),
-        'type' => 'text_default',
+        'module' => 'entityreference',
+        'settings' => array(
+          'link' => FALSE,
+        ),
+        'type' => 'entityreference_label',
         'weight' => 22,
       ),
       'teaser' => array(
@@ -763,11 +766,13 @@ function easyopac_local_material_field_default_field_instances() {
     ),
     'widget' => array(
       'active' => 1,
-      'module' => 'text',
+      'module' => 'entityreference',
       'settings' => array(
+        'match_operator' => 'CONTAINS',
+        'path' => '',
         'size' => 60,
       ),
-      'type' => 'text_textfield',
+      'type' => 'entityreference_autocomplete',
       'weight' => 33,
     ),
   );
@@ -787,10 +792,10 @@ function easyopac_local_material_field_default_field_instances() {
       ),
       'default' => array(
         'label' => 'inline',
-        'module' => 'text',
+        'module' => 'taxonomy',
         'settings' => array(),
-        'type' => 'text_default',
-        'weight' => 29,
+        'type' => 'taxonomy_term_reference_plain',
+        'weight' => 28,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -809,11 +814,12 @@ function easyopac_local_material_field_default_field_instances() {
     ),
     'widget' => array(
       'active' => 1,
-      'module' => 'text',
+      'module' => 'taxonomy',
       'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
         'size' => 60,
       ),
-      'type' => 'text_textfield',
+      'type' => 'taxonomy_autocomplete',
       'weight' => 39,
     ),
   );
@@ -836,7 +842,7 @@ function easyopac_local_material_field_default_field_instances() {
         'module' => 'text',
         'settings' => array(),
         'type' => 'text_default',
-        'weight' => 33,
+        'weight' => 31,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -869,7 +875,7 @@ function easyopac_local_material_field_default_field_instances() {
     'bundle' => 'local_material',
     'default_value' => NULL,
     'deleted' => 0,
-    'description' => 'ting_details_contributor',
+    'description' => '',
     'display' => array(
       'alternative_layout_full' => array(
         'label' => 'above',
@@ -879,16 +885,16 @@ function easyopac_local_material_field_default_field_instances() {
       ),
       'default' => array(
         'label' => 'inline',
-        'module' => 'text',
+        'module' => 'taxonomy',
         'settings' => array(),
-        'type' => 'text_default',
-        'weight' => 31,
+        'type' => 'taxonomy_term_reference_plain',
+        'weight' => 29,
       ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 21,
+        'weight' => 0,
       ),
     ),
     'entity_type' => 'node',
@@ -896,16 +902,16 @@ function easyopac_local_material_field_default_field_instances() {
     'label' => 'Contributor',
     'required' => 0,
     'settings' => array(
-      'text_processing' => 0,
       'user_register_form' => FALSE,
     ),
     'widget' => array(
-      'active' => 1,
-      'module' => 'text',
+      'active' => 0,
+      'module' => 'taxonomy',
       'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
         'size' => 60,
       ),
-      'type' => 'text_textfield',
+      'type' => 'taxonomy_autocomplete',
       'weight' => 41,
     ),
   );
@@ -928,7 +934,7 @@ function easyopac_local_material_field_default_field_instances() {
         'module' => 'text',
         'settings' => array(),
         'type' => 'text_default',
-        'weight' => 35,
+        'weight' => 33,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -974,7 +980,7 @@ function easyopac_local_material_field_default_field_instances() {
         'module' => 'text',
         'settings' => array(),
         'type' => 'text_default',
-        'weight' => 41,
+        'weight' => 39,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1066,7 +1072,7 @@ function easyopac_local_material_field_default_field_instances() {
         'module' => 'text',
         'settings' => array(),
         'type' => 'text_default',
-        'weight' => 27,
+        'weight' => 26,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1174,7 +1180,7 @@ function easyopac_local_material_field_default_field_instances() {
         'module' => 'text',
         'settings' => array(),
         'type' => 'text_default',
-        'weight' => 39,
+        'weight' => 37,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1217,9 +1223,9 @@ function easyopac_local_material_field_default_field_instances() {
       ),
       'default' => array(
         'label' => 'inline',
-        'module' => 'text',
+        'module' => 'taxonomy',
         'settings' => array(),
-        'type' => 'text_default',
+        'type' => 'taxonomy_term_reference_plain',
         'weight' => 23,
       ),
       'teaser' => array(
@@ -1239,11 +1245,12 @@ function easyopac_local_material_field_default_field_instances() {
     ),
     'widget' => array(
       'active' => 1,
-      'module' => 'text',
+      'module' => 'taxonomy',
       'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
         'size' => 60,
       ),
-      'type' => 'text_textfield',
+      'type' => 'taxonomy_autocomplete',
       'weight' => 34,
     ),
   );
@@ -1266,7 +1273,7 @@ function easyopac_local_material_field_default_field_instances() {
         'module' => 'text',
         'settings' => array(),
         'type' => 'text_default',
-        'weight' => 38,
+        'weight' => 36,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1312,7 +1319,7 @@ function easyopac_local_material_field_default_field_instances() {
         'module' => 'text',
         'settings' => array(),
         'type' => 'text_default',
-        'weight' => 32,
+        'weight' => 30,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1358,7 +1365,7 @@ function easyopac_local_material_field_default_field_instances() {
         'module' => 'text',
         'settings' => array(),
         'type' => 'text_default',
-        'weight' => 36,
+        'weight' => 34,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1404,7 +1411,7 @@ function easyopac_local_material_field_default_field_instances() {
         'module' => 'text',
         'settings' => array(),
         'type' => 'text_default',
-        'weight' => 46,
+        'weight' => 44,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1450,7 +1457,7 @@ function easyopac_local_material_field_default_field_instances() {
         'module' => 'text',
         'settings' => array(),
         'type' => 'text_default',
-        'weight' => 37,
+        'weight' => 35,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1483,7 +1490,7 @@ function easyopac_local_material_field_default_field_instances() {
     'bundle' => 'local_material',
     'default_value' => NULL,
     'deleted' => 0,
-    'description' => 'ting_details_publisher',
+    'description' => '',
     'display' => array(
       'alternative_layout_full' => array(
         'label' => 'above',
@@ -1493,16 +1500,16 @@ function easyopac_local_material_field_default_field_instances() {
       ),
       'default' => array(
         'label' => 'inline',
-        'module' => 'text',
+        'module' => 'taxonomy',
         'settings' => array(),
-        'type' => 'text_default',
-        'weight' => 42,
+        'type' => 'taxonomy_term_reference_plain',
+        'weight' => 41,
       ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 7,
+        'weight' => 0,
       ),
     ),
     'entity_type' => 'node',
@@ -1510,16 +1517,16 @@ function easyopac_local_material_field_default_field_instances() {
     'label' => 'Publisher',
     'required' => 0,
     'settings' => array(
-      'text_processing' => 0,
       'user_register_form' => FALSE,
     ),
     'widget' => array(
-      'active' => 1,
-      'module' => 'text',
+      'active' => 0,
+      'module' => 'taxonomy',
       'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
         'size' => 60,
       ),
-      'type' => 'text_textfield',
+      'type' => 'taxonomy_autocomplete',
       'weight' => 53,
     ),
   );
@@ -1542,7 +1549,7 @@ function easyopac_local_material_field_default_field_instances() {
         'module' => 'text',
         'settings' => array(),
         'type' => 'text_default',
-        'weight' => 34,
+        'weight' => 32,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1588,7 +1595,7 @@ function easyopac_local_material_field_default_field_instances() {
         'module' => 'text',
         'settings' => array(),
         'type' => 'text_default',
-        'weight' => 43,
+        'weight' => 40,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1621,7 +1628,7 @@ function easyopac_local_material_field_default_field_instances() {
     'bundle' => 'local_material',
     'default_value' => NULL,
     'deleted' => 0,
-    'description' => 'ting_details_spatial',
+    'description' => '',
     'display' => array(
       'alternative_layout_full' => array(
         'label' => 'above',
@@ -1630,17 +1637,16 @@ function easyopac_local_material_field_default_field_instances() {
         'weight' => 0,
       ),
       'default' => array(
-        'label' => 'inline',
-        'module' => 'text',
+        'label' => 'above',
         'settings' => array(),
-        'type' => 'text_default',
-        'weight' => 30,
+        'type' => 'hidden',
+        'weight' => 3,
       ),
       'teaser' => array(
         'label' => 'above',
         'settings' => array(),
         'type' => 'hidden',
-        'weight' => 32,
+        'weight' => 0,
       ),
     ),
     'entity_type' => 'node',
@@ -1648,16 +1654,16 @@ function easyopac_local_material_field_default_field_instances() {
     'label' => 'Spatial',
     'required' => 0,
     'settings' => array(
-      'text_processing' => 0,
       'user_register_form' => FALSE,
     ),
     'widget' => array(
-      'active' => 1,
-      'module' => 'text',
+      'active' => 0,
+      'module' => 'taxonomy',
       'settings' => array(
+        'autocomplete_path' => 'taxonomy/autocomplete',
         'size' => 60,
       ),
-      'type' => 'text_textfield',
+      'type' => 'taxonomy_autocomplete',
       'weight' => 40,
     ),
   );
@@ -1726,7 +1732,7 @@ function easyopac_local_material_field_default_field_instances() {
         'module' => 'taxonomy',
         'settings' => array(),
         'type' => 'taxonomy_term_reference_link',
-        'weight' => 28,
+        'weight' => 27,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1815,9 +1821,9 @@ function easyopac_local_material_field_default_field_instances() {
       ),
       'default' => array(
         'label' => 'inline',
-        'module' => 'text',
+        'module' => 'taxonomy',
         'settings' => array(),
-        'type' => 'text_default',
+        'type' => 'taxonomy_term_reference_plain',
         'weight' => 20,
       ),
       'teaser' => array(
@@ -1837,11 +1843,11 @@ function easyopac_local_material_field_default_field_instances() {
     ),
     'widget' => array(
       'active' => 1,
-      'module' => 'text',
+      'module' => 'options',
       'settings' => array(
         'size' => 60,
       ),
-      'type' => 'text_textfield',
+      'type' => 'options_select',
       'weight' => 31,
     ),
   );
@@ -1864,7 +1870,7 @@ function easyopac_local_material_field_default_field_instances() {
         'module' => 'text',
         'settings' => array(),
         'type' => 'text_default',
-        'weight' => 40,
+        'weight' => 38,
       ),
       'teaser' => array(
         'label' => 'above',
@@ -1892,6 +1898,128 @@ function easyopac_local_material_field_default_field_instances() {
     ),
   );
 
+  // Exported field_instance:
+  // 'taxonomy_term-lm_relations-field_lm_relation_abstract'.
+  $field_instances['taxonomy_term-lm_relations-field_lm_relation_abstract'] = array(
+    'bundle' => 'lm_relations',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'inline',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 2,
+      ),
+    ),
+    'entity_type' => 'taxonomy_term',
+    'field_name' => 'field_lm_relation_abstract',
+    'label' => 'LM: Relation Abstract',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'rows' => 5,
+      ),
+      'type' => 'text_textarea',
+      'weight' => 42,
+    ),
+  );
+
+  // Exported field_instance:
+  // 'taxonomy_term-lm_relations-field_lm_relation_online'.
+  $field_instances['taxonomy_term-lm_relations-field_lm_relation_online'] = array(
+    'bundle' => 'lm_relations',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'inline',
+        'module' => 'link',
+        'settings' => array(),
+        'type' => 'link_default',
+        'weight' => 1,
+      ),
+    ),
+    'entity_type' => 'taxonomy_term',
+    'field_name' => 'field_lm_relation_online',
+    'label' => 'LM: Relation Online',
+    'required' => 0,
+    'settings' => array(
+      'absolute_url' => 1,
+      'attributes' => array(
+        'class' => '',
+        'configurable_class' => 0,
+        'configurable_title' => 0,
+        'rel' => '',
+        'target' => 'default',
+        'title' => '',
+      ),
+      'display' => array(
+        'url_cutoff' => 80,
+      ),
+      'enable_tokens' => 1,
+      'rel_remove' => 'default',
+      'title' => 'optional',
+      'title_label_use_field_label' => 0,
+      'title_maxlength' => 128,
+      'title_value' => '',
+      'url' => 'optional',
+      'user_register_form' => FALSE,
+      'validate_url' => 1,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'link',
+      'settings' => array(),
+      'type' => 'link_field',
+      'weight' => 43,
+    ),
+  );
+
+  // Exported field_instance:
+  // 'taxonomy_term-lm_relations-field_lm_relation_type'.
+  $field_instances['taxonomy_term-lm_relations-field_lm_relation_type'] = array(
+    'bundle' => 'lm_relations',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'inline',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 3,
+      ),
+    ),
+    'entity_type' => 'taxonomy_term',
+    'field_name' => 'field_lm_relation_type',
+    'label' => 'LM: Relation Type',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 41,
+    ),
+  );
+
   // Translatables
   // Included for use with string extractors like potx.
   t('Age');
@@ -1910,6 +2038,10 @@ function easyopac_local_material_field_default_field_instances() {
   t('ISBN no.');
   t('Issues');
   t('Item ID');
+  t('LM: Relation Abstract');
+  t('LM: Relation Online');
+  t('LM: Relation Type');
+  t('LM: Ting relations');
   t('Language');
   t('Later title');
   t('Musician');
@@ -1931,7 +2063,6 @@ function easyopac_local_material_field_default_field_instances() {
   t('Subject');
   t('Subjects');
   t('Subtitle');
-  t('Ting relations');
   t('Type');
   t('Version');
   t('ding_availability_holdings');
@@ -1944,7 +2075,6 @@ function easyopac_local_material_field_default_field_instances() {
   t('ting_details_age');
   t('ting_details_audience');
   t('ting_details_classification');
-  t('ting_details_contributor');
   t('ting_details_description');
   t('ting_details_extent');
   t('ting_details_format');
@@ -1954,13 +2084,11 @@ function easyopac_local_material_field_default_field_instances() {
   t('ting_details_language');
   t('ting_details_musician');
   t('ting_details_pegi');
-  t('ting_details_publisher');
   t('ting_details_referenced');
   t('ting_details_replaced_by');
   t('ting_details_replaces');
   t('ting_details_rights');
   t('ting_details_source');
-  t('ting_details_spatial');
   t('ting_details_spoken');
   t('ting_details_subjects');
   t('ting_details_subtitles');
@@ -1969,7 +2097,6 @@ function easyopac_local_material_field_default_field_instances() {
   t('ting_details_uri');
   t('ting_details_version');
   t('ting_reference_reverse');
-  t('ting_relations');
   t('ting_series');
   t('ting_subjects');
   t('ting_type');

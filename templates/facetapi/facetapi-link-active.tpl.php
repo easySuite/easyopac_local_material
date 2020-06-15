@@ -15,10 +15,10 @@ $options = [
   'absolute' => TRUE,
   'attributes' => [
     'title' => $text,
-    'id' => $original_options['attributes']['id'],
-    'rel' => $original_options['attributes']['rel'],
+    'id' => !empty($original_options['attributes']['id']) ? $original_options['attributes']['id'] : '',
+    'rel' => !empty($original_options['attributes']['rel']) ? $original_options['attributes']['rel'] : '',
   ],
-  'query' => $original_options['query'],
+  'query' => !empty($original_options['query']) ? $original_options['query'] : [],
 ];
 ?>
 
@@ -28,6 +28,6 @@ $options = [
          name="type[<?php print $text; ?>]" value="<?php print $text; ?>"
          checked="checked" class="form-checkbox">
   <label class="option" for="<?php print $common_attr_id; ?>">
-    <?php print l($text . '<span class="count"> (' . $count . ')</span>', $path, $options); ?>
+    <?php print l(strtolower($text) . '<span class="count"> (' . $count . ')</span>', $path, $options); ?>
   </label>
 </div>

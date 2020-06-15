@@ -8,15 +8,45 @@
 include_once 'easyopac_local_material.features.inc';
 
 /**
+ * Implements hook_ctools_plugin_directory().
+ */
+function easyopac_local_material_ctools_plugin_directory($owner, $plugin_type) {
+  if ($owner == 'ctools' && !empty($plugin_type)) {
+    return "plugins/$plugin_type";
+  }
+}
+
+/**
  * Implements hook_menu().
  */
 function easyopac_local_material_menu() {
-  $items['admin/import/ting'] = [
-    'title' => 'Import ting items',
+  $items['admin/config/local-material'] = [
+    'title' => 'Local Materials',
+    'page callback' => 'system_admin_config_page',
+    'access arguments' => ['administer site configuration'],
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  ];
+
+  $items['admin/config/local-material/import'] = [
+    'title' => 'Import materials',
     'description' => 'Get remote ting objects data to local storage.',
     'page callback' => 'drupal_get_form',
     'page arguments' => ['easyopac_local_material_ting_object_import_form'],
-    'access arguments' => ['access content'],
+    'access arguments' => ['administer site configuration'],
+    'type' => MENU_NORMAL_ITEM,
+    'weight' => 1,
+  ];
+
+  $items['admin/config/local-material/clean'] = [
+    'title' => 'Cleanup imported materials',
+    'description' => 'Clean all imported items, files and terms.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => ['easyopac_local_material_cleanup_form'],
+    'access arguments' => ['administer site configuration'],
+    'type' => MENU_NORMAL_ITEM,
+    'weight' => 2,
+    'file' => 'easyopac_local_material.admin.inc',
   ];
 
   return $items;
@@ -38,50 +68,73 @@ function easyopac_local_material_ting_object_import_form() {
 }
 
 /**
- * Ting Objects import batch.
- *
- * @param bool $success
- *   Batch operation status.
- * @param array $operations
- *   Set of started operations to be processed.
+ * Ting Object import form submit callback.
  */
-function easyopac_local_material_batch_finished($success, array $operations) {
-  if ($success) {
-    drupal_set_message('Import is complete!');
+function easyopac_local_material_ting_object_import_form_submit() {
+  $operations = [];
+
+  // Starting nodes import process.
+  $ids = easyopac_local_material_get_recursively();
+  foreach ($ids as $id) {
+    $operations[] = ['easyopac_local_material_batch', [$id]];
   }
-  else {
-    $error_operation = reset($operations);
-    $message = t('An error occurred while processing %error_operation with arguments: @arguments', [
-      '%error_operation' => $error_operation[0],
-      '@arguments' => print_r($error_operation[1], TRUE),
-    ]);
-    drupal_set_message($message, 'error');
-    drupal_set_message(l(t('Run again'), 'admin/import/ting'));
-  }
+
+  // Run preprocess of isPartOf values.
+  $operations[] = ['easyopac_local_material_ispartof_process', []];
+
+  $batch = [
+    'operations' => $operations,
+    'finished' => 'easyopac_local_material_batch_finished',
+    'title' => t('Ting Object Import'),
+    'init_message' => t('Import is starting...'),
+    'progress_message' => t('Processed @current out of @total.'),
+    'error_message' => t('Import has encountered an error.'),
+  ];
+
+  batch_set($batch);
+  batch_process('admin/config/local-material/import');
 }
 
 /**
- * Processing of series field.
+ * Process isPartOf.
  *
- * @param object $entity
- *   Ting Object entity.
- *
- * @return string|null
- *   Prepared series field data for saving in database or empty string.
+ * @param array $context
+ *   Batch context.
  */
-function easyopac_local_material_get_series($entity) {
-  $markup = '';
-  if ($entity->serieTitle) {
-    foreach ($entity->serieTitle as $title) {
-      $series_number = isset($title[1]) ? ' : ' . check_plain($title[1]) . ' ; ' : ' ; ';
-      $markup = $title[0] . $series_number;
-    }
-  }
-  elseif ($entity->serieDescription) {
-    $markup = $entity->serieDescription;
-  }
+function easyopac_local_material_ispartof_process(&$context) {
+  $context['message'] = "Processing of isPartOf.";
+  $asd = db_select('node', 'n')
+    ->fields('n', ['nid', 'title']);
+  $asd->join('field_data_field_lm_item_id', 'flid', 'n.nid=flid.entity_id');
+  $asd->addField('flid', 'field_lm_item_id_value', 'item_id');
+  $asd->condition('n.type', 'local_material');
+  $results = $asd->execute()->fetchAll();
 
-  return $markup;
+  foreach ($results as $result) {
+    /** @var \TingEntity $entity */
+    $entity = ding_entity_load($result->item_id);
+
+    $is_part_of = $entity->getIsPartOf();
+
+    if (!empty($is_part_of)) {
+      $parse_title = explode(',', reset($is_part_of));
+
+      $nid = db_select('node', 'n')
+        ->fields('n', ['nid'])
+        ->condition('title', $parse_title[0])
+        ->execute()
+        ->fetchField();
+
+      if (!empty($nid)) {
+        $node = node_load($result->nid);
+        $node_wrapper = entity_metadata_wrapper('node', $node);
+        $node_wrapper->field_lmd_available_in->set($nid);
+        $node_wrapper->save();
+      }
+    }
+
+    $context['results'][] = $result->nid;
+  }
 }
 
 /**
@@ -102,15 +155,16 @@ function easyopac_local_material_batch($id, array &$context) {
   $field_data['field_lm_cover'] = easyopac_local_material_fetch_cover($id);
   $field_data['field_lm_object_title'] = $entity->getTitle();
   $field_data['field_lm_item_id'] = $entity->getId();
-  $field_data['field_lm_object_type'] = $entity->getType();
+  $field_data['field_lm_object_type'][] = $entity->getType();
   $field_data['field_lm_object_year'] = $entity->getDate();
   $field_data['field_lm_object_abstract'] = $entity->getAbstract();
-  $field_data['field_lm_object_author'] = !empty($entity->getCreators()) ? $entity->getCreators() : [];
+  $field_data['field_lm_object_author'] = easyopac_local_material_get_authors($entity);
   $field_data['field_lm_subjects'] = $entity->getSubjects();
   $field_data['field_lm_holdings_information'] = $entity->getId();
   $field_data['field_lm_issues'] = $entity->getId();
   $field_data['field_lm_series'] = easyopac_local_material_get_series($entity);
   $field_data['field_lm_on_this_site'] = $entity->getId();
+  $field_data['field_lm_ting_relations'] = easyopac_local_material_get_relations($entity);
 
   // Collect details fields.
   $local_material_instance = field_info_instances('node', 'local_material');
@@ -135,6 +189,13 @@ function easyopac_local_material_batch($id, array &$context) {
     'field_lm_subjects' => 'lm_subjects',
     'field_lmd_audience' => 'lm_audience',
     'field_lmd_subject' => 'lm_subjects',
+    'field_lmd_publisher' => 'lm_authors',
+    'field_lmd_contributor' => 'lm_authors',
+    'field_lmd_spatial' => 'lm_spatials',
+    'field_lm_object_type' => 'lm_object_types',
+    'field_lmd_type' => 'lm_object_types',
+    'field_lmd_language' => 'lm_languages',
+    'field_lmd_classification' => 'lm_classifications',
   ];
 
   foreach ($field_data as $fn => $field_datum) {
@@ -146,8 +207,9 @@ function easyopac_local_material_batch($id, array &$context) {
           // Check taxonomy vocabularies for term.
           $vocabulary = taxonomy_vocabulary_machine_name_load($fv_mapping[$fn]);
           $terms = db_select('taxonomy_term_data', 'ttd')
-            ->fields('ttd')
+            ->fields('ttd', ['name', 'tid', 'vid'])
             ->condition('name', $item)
+            ->condition('vid', $vocabulary->vid)
             ->execute()
             ->fetchAll();
 
@@ -165,7 +227,9 @@ function easyopac_local_material_batch($id, array &$context) {
 
         $node->{$fn}[LANGUAGE_NONE] = $prep_array;
       }
-
+      elseif ($fn == 'field_lm_ting_relations') {
+        $node->{$fn}[LANGUAGE_NONE] = $field_datum;
+      }
       elseif (is_array($field_datum) && !in_array($fn, array_keys($fv_mapping))) {
         $ret_nontaxonomy = [];
         foreach ($field_datum as $non_taxonomy) {
@@ -186,53 +250,30 @@ function easyopac_local_material_batch($id, array &$context) {
   $node = node_submit($node);
   node_save($node);
 
-  $context['message'] = "Now processing object with id: $id ...";
+  $context['message'] = "Processed object with id: $id ...";
 }
 
 /**
- * Fetch material object cover image and save as managed file.
+ * Ting Objects import batch.
  *
- * @param string $id
- *   Ting Object id.
- *
- * @return string|null
- *   Local image file id or empty if no cover found.
+ * @param bool $success
+ *   Batch operation status.
+ * @param array $operations
+ *   Set of started operations to be processed.
  */
-function easyopac_local_material_fetch_cover($id) {
-  $cover = NULL;
-
-  $req = ting_covers_addi_ting_covers([$id => $id]);
-  if (!empty($req)) {
-    $local_covers_directory = 'public://local-covers';
-    file_prepare_directory($local_covers_directory, FILE_CREATE_DIRECTORY);
-
-    $url = reset($req);
-    $image_file = file_save_data(file_get_contents($url), 'public://local-covers/' . $id . '.jpg', FILE_EXISTS_REPLACE);
-    $cover = $image_file->fid;
+function easyopac_local_material_batch_finished($success, array $operations) {
+  if ($success) {
+    drupal_set_message('Import is complete!');
   }
-
-  return $cover;
-}
-
-/**
- * Ting Object import form submit callback.
- */
-function easyopac_local_material_ting_object_import_form_submit() {
-  $batch = [
-    'operations' => [],
-    'finished' => 'easyopac_local_material_batch_finished',
-    'title' => t('Ting Object Import'),
-    'init_message' => t('Import is starting...'),
-    'progress_message' => t('Processed @current out of @total.'),
-    'error_message' => t('Import has encountered an error.'),
-  ];
-
-  $ids = easyopac_local_material_get_recursively();
-  foreach ($ids as $id) {
-    $batch['operations'][] = ['easyopac_local_material_batch', [$id]];
+  else {
+    $error_operation = reset($operations);
+    $message = t('An error occurred while processing %error_operation with arguments: @arguments', [
+      '%error_operation' => $error_operation[0],
+      '@arguments' => print_r($error_operation[1], TRUE),
+    ]);
+    drupal_set_message($message, 'error');
+    drupal_set_message(l(t('Run again'), 'admin/config/local-material/import'));
   }
-  batch_set($batch);
-  batch_process('admin/import/ting');
 }
 
 /**
@@ -296,7 +337,7 @@ function easyopac_local_material_get_recursively($page = 0, array $ids_array = [
     $collection = $item->getEntities();
 
     foreach ($collection as $collection_item) {
-      $ids_array[$collection_item->id] = $collection_item->id;
+      $ids_array[] = $collection_item->id;
     }
   }
 
@@ -318,13 +359,12 @@ function easyopac_local_material_record_info() {
 
   $ret['field_lmd_type'] = 'type';
   $ret['field_lmd_format'] = ['dc:format'];
-  $ret['field_lmd_available_in'] = ['dcterms:isPartOf'];
   $ret['field_lmd_language'] = 'language';
   $ret['field_lmd_subtitle'] = ['dc:language' => 'dkdcplus:subtitles'];
   $ret['field_lmd_genre'] = ['dc:subject' => 'dkdcplus:genre'];
   $ret['field_lmd_subject'] = 'subjects';
   $ret['field_lmd_classification'] = 'classification';
-  $ret['field_lmd_spatial'] = ['dcterms:spatial'];
+  $ret['field_lmd_spatial'] = ['dcterms:spatial' => 'dkdcplus:DBCF'];
   $ret['field_lmd_contributor'] = 'contributors';
   $ret['field_lmd_contains'] = ['dc:description' => 'dkdcplus:series'];
   $ret['field_lmd_referenced_by'] = ['dcterms:isReferencedBy'];
@@ -403,10 +443,158 @@ function easyopac_local_material_parse($field_type, $value) {
           $ret[] = l($val, $val);
         }
         break;
+
+      case 'field_lmd_type':
+      case 'field_lmd_classification':
+        $ret = [$value];
+        break;
+
+      case 'field_lmd_language':
+        $langs = [];
+        $values = explode(',', $value);
+        foreach ($values as $item) {
+          $langs[] = trim($item);
+        }
+        $ret = $langs;
+        break;
     }
   }
 
   return $ret;
+}
+
+/**
+ * Processing of series field.
+ *
+ * @param object $entity
+ *   Ting Object entity.
+ *
+ * @return string|null
+ *   Prepared series field data for saving in database or empty string.
+ */
+function easyopac_local_material_get_series($entity) {
+  $markup = '';
+  if ($entity->serieTitle) {
+    foreach ($entity->serieTitle as $title) {
+      $series_number = isset($title[1]) ? ' : ' . check_plain($title[1]) . ' ; ' : ' ; ';
+      $markup = $title[0] . $series_number;
+    }
+  }
+  elseif ($entity->serieDescription) {
+    $markup = $entity->serieDescription;
+  }
+
+  return $markup;
+}
+
+/**
+ * Get authors.
+ *
+ * @param \TingEntity $entity
+ *   Processed entity.
+ *
+ * @return array
+ *   Material's registered authors.
+ */
+function easyopac_local_material_get_authors(TingEntity $entity) {
+  $type = $entity->getType();
+  $creators = [];
+  if (isset($entity->record['dc:creator'])) {
+    $creators = $entity->record['dc:creator'];
+  }
+  $authors = [];
+  if ($type != 'Ebog' && !empty($creators) && isset($creators['dkdcplus:aut'])) {
+    foreach ($creators['dkdcplus:aut'] as $creator) {
+      $authors[] = $creator;
+    }
+  }
+
+  return $authors;
+}
+
+/**
+ * Get relations from processed entity.
+ *
+ * @param \TingEntity $entity
+ *   Processed entity.
+ *
+ * @return array
+ *   Array of term ids.
+ */
+function easyopac_local_material_get_relations(TingEntity $entity) {
+  $tids = [];
+  $relation_types = ting_relation_inline();
+  $entity->getRelations();
+
+  foreach ($entity->relations as $rid => $relation) {
+    if (isset($relation_types[$relation->type])) {
+      // The isPartOfManifestion relation has all relation to other libraries
+      // copies of the relation, so we filter the ones that do not belong to
+      // current library.
+      $owner_id = is_object($relation->object) ? $relation->object->getOwnerId() : NULL;
+      if ($relation->type == 'isPartOfManifestation' && variable_get('ting_agency', -1) != $owner_id) {
+        continue;
+      }
+
+      $title = ting_relation_get_title($relation);
+      $abstract = ting_relation_get_abstract($relation);
+      $online = ting_relation_get_online_url($relation);
+      $type = $relation->type;
+
+      $vocab = taxonomy_vocabulary_machine_name_load('lm_relations');
+
+      $check_existing = db_select('taxonomy_term_data', 'ttd');
+      $check_existing->join('field_data_field_lm_relation_online', 'ro', 'ttd.tid=ro.entity_id');
+      $check_existing = $check_existing->fields('ttd', ['tid'])
+        ->condition('ttd.name', $title)
+        ->condition('ttd.vid', $vocab->vid)
+        ->condition('ro.field_lm_relation_online_url', $online['url'])
+        ->execute()
+        ->fetchField();
+
+      if (empty($check_existing)) {
+        $term = new stdClass();
+        $term->name = $title;
+        $term->vid = $vocab->vid;
+        $term->field_lm_relation_type[LANGUAGE_NONE][0]['value'] = $type;
+        $term->field_lm_relation_abstract[LANGUAGE_NONE][0]['value'] = $abstract;
+        $term->field_lm_relation_online[LANGUAGE_NONE][0] = $online;
+        taxonomy_term_save($term);
+
+        $tids[]['tid'] = $term->tid;
+      }
+      else {
+        $tids[]['tid'] = $check_existing;
+      }
+    }
+  }
+
+  return $tids;
+}
+
+/**
+ * Fetch material object cover image and save as managed file.
+ *
+ * @param string $id
+ *   Ting Object id.
+ *
+ * @return string|null
+ *   Local image file id or empty if no cover found.
+ */
+function easyopac_local_material_fetch_cover($id) {
+  $cover = NULL;
+
+  $req = ting_covers_addi_ting_covers([$id => $id]);
+  if (!empty($req)) {
+    $local_covers_directory = 'public://local-covers';
+    file_prepare_directory($local_covers_directory, FILE_CREATE_DIRECTORY);
+
+    $url = reset($req);
+    $image_file = file_save_data(file_get_contents($url), 'public://local-covers/' . $id . '.jpg', FILE_EXISTS_REPLACE);
+    $cover = $image_file->fid;
+  }
+
+  return $cover;
 }
 
 /**
@@ -458,8 +646,10 @@ function easyopac_local_material_process_node(&$variables) {
   }
 
   if ($variables['type'] == 'local_material' && $variables['view_mode'] == 'teaser') {
-    if (!empty($variables['field_lm_object_type'][LANGUAGE_NONE][0]['value'])) {
-      $material_type = $variables['field_lm_object_type'][LANGUAGE_NONE][0]['value'];
+    if (!empty($variables['field_lm_object_type'][LANGUAGE_NONE][0]['tid'])) {
+      $type_term = $variables['field_lm_object_type'][LANGUAGE_NONE][0]['tid'];
+      $material_type = taxonomy_term_load($type_term);
+      $material_type = $material_type->name;
 
       $title_markup = $variables['content']['group_materials_right_col_search']['field_lm_object_title'][0]['#markup'];
       $title_link = l($title_markup, 'node/' . $variables['node']->nid, ['html' => TRUE]);
@@ -620,13 +810,13 @@ function easyopac_local_material_process_node(&$variables) {
       unset($content['group_on_this_site']);
     }
 
-    if (isset($content['ting_relations']) && $content['ting_relations']) {
-      $variables['content']['ting-relations'] = [
+    if (isset($content['field_lm_ting_relations']) && $content['field_lm_ting_relations']) {
+      $variables['content']['field-lm-ting-relations'] = [
         'content' => [
-          'details' => $content['ting_relations'],
+          'details' => $content['field_lm_ting_relations'],
         ],
       ];
-      unset($content['ting_relations']);
+      unset($content['field_lm_ting_relations']);
     }
   }
 }
@@ -679,5 +869,289 @@ function easyopac_local_material_process_field(&$variables) {
       $link = l($item['taxonomy_term']->name, '/', ['query' => ['f' => [$element['#field_name'] . ':' . $item['tid']]]]);
       $variables['items'][$delta] = ['#markup' => $link];
     }
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function easyopac_local_material_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'views_exposed_form' && isset($form_state['view'])) {
+    $form['#tree'] = TRUE;
+    $qp = drupal_get_query_parameters();
+    $action_url = url('/' . current_path(), ['query' => $qp]);
+
+    $form['#action'] = $action_url;
+
+    foreach ($form['items_per_page']['#options'] as $size => $option) {
+      $form['items_per_page']['#options'][$size] = t('Number of search result per page: !num', ['!num' => $size]);
+    }
+
+    $options = [
+      '' => t('Ranking'),
+      'search_api_aggregation_1:asc' => t('Title (Ascending)'),
+      'search_api_aggregation_1:desc' => t('Title (Descending)'),
+      'search_api_aggregation_2:asc' => t('Creator (Ascending)'),
+      'search_api_aggregation_2:desc' => t('Creator (Descending)'),
+      'search_api_aggregation_3:asc' => t('Date (Ascending)'),
+      'search_api_aggregation_3:desc' => t('Date (Descending)'),
+    ];
+
+    foreach ($options as $key => $option) {
+      $options[$key] = t('Sort by: !sort', ['!sort' => $option]);
+    }
+
+    $form['custom_sort'] = [
+      '#type' => 'select',
+      '#options' => $options,
+      '#title' => t('Sort by'),
+    ];
+
+    $form['#submit'][] = 'easyopac_local_material_exposed_form_submit';
+  }
+}
+
+/**
+ * Exposed form custom submit callback.
+ */
+function easyopac_local_material_exposed_form_submit(&$form, &$form_state) {
+  $submitted_sort = $form_state['values']['custom_sort'];
+  if (!empty($submitted_sort)) {
+    $parts = explode(':', $submitted_sort);
+    $default_sort_order = 'DESC';
+
+    if (isset($parts[1])) {
+      $default_sort_order = strtoupper($parts[1]);
+    }
+    $form_state['values']['sort_by'] = $form_state['input']['sort_by'] = $parts[0];
+    $form_state['values']['sort_order'] = $form_state['input']['sort_order'] = strtoupper($parts[1]);
+
+    $form_state['view']->exposed_data['sort_by'] = $parts[0];
+    $form_state['view']->exposed_data['sort_order'] = $default_sort_order;
+  }
+}
+
+/**
+ * Implements hook_views_pre_render().
+ */
+function easyopac_local_material_views_pre_render(&$view) {
+  if ($view->name == 'local_materials_search' && $view->current_display == 'default') {
+    if (empty($view->result)) {
+      $view->exposed_widgets = NULL;
+    }
+  }
+}
+
+/**
+ * Implements hook_process_HOOK().
+ */
+function easyopac_local_material_process_views_view(&$variables) {
+  $prefix = '';
+  $message = '';
+  $search_result = $variables['view']->result;
+  $limit = 100;
+
+  if (isset($search_result) && $limit < $variables['view']->total_rows) {
+    $msg = t('Your search gave more than %s results. Try to search more specific or use the facets to filter the result.');
+    $msg = sprintf($msg, $limit);
+    $message .= '<div class="messages search-field-in-content--message">' . $msg . '</div>';
+  }
+
+  $prefix .= $message;
+
+  $variables['rows'] = $prefix . $variables['rows'];
+}
+
+/**
+ * Rewrite facet block titles.
+ *
+ * @param array $facet
+ *   Facet block data.
+ *
+ * @return string
+ *   Title of the facet block.
+ */
+function ddbasic_facetapi_title(array $facet) {
+  return $facet['title'];
+}
+
+/**
+ * Implements hook_block_view_alter().
+ */
+function easyopac_local_material_block_view_alter(&$data, $block) {
+  if ($block->module == 'facetapi') {
+    $field_name = $data['content']['#facet']['name'];
+
+    if (!isset($data['content'][$field_name]['#items'])) {
+      unset($data['content']);
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function easyopac_local_material_preprocess_field(&$variables) {
+  if ($variables['element']['#field_name'] == 'field_lm_ting_relations') {
+    $element = $variables['element'];
+
+    $items = [];
+    $group = [];
+    foreach ($element['#items'] as $item) {
+      $type = $item['taxonomy_term']->field_lm_relation_type[LANGUAGE_NONE][0]['value'];
+      $group[$type] = $type;
+
+      $items[$type][] = [
+        '#theme' => 'local_relation',
+        '#item' => [
+          'title' => $item['taxonomy_term']->name,
+          'abstract' => $item['taxonomy_term']->field_lm_relation_abstract[LANGUAGE_NONE][0]['value'],
+          'online' => $item['taxonomy_term']->field_lm_relation_online[LANGUAGE_NONE][0],
+        ],
+      ];
+    }
+
+    $group_keys = array_keys($group);
+    $types = ting_relation_inline();
+    foreach ($group_keys as $group_key) {
+      $wrapper[] = [
+        '#type' => 'container',
+        '#attributes' => [
+          'id' => $group_key,
+          'class' => [
+            'ting-object-wrapper',
+            'field-group-format',
+            'field-group-div',
+            'collapsible',
+            'collapsed',
+            'speed-fast',
+            'effect-none',
+          ],
+        ],
+        'items' => [
+          '#theme' => 'local_relations',
+          '#title' => "<span class='field-group-format-toggler'>" . $types[$group_key] . "</span>",
+          '#items' => $items[$group_key],
+        ],
+      ];
+    }
+
+    unset($variables['items']);
+    $variables['items'][0]['#markup'] = drupal_render($wrapper);
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function easyopac_local_material_theme($existing, $type, $theme, $path) {
+  return [
+    'local_relations' => [
+      'variables' => [
+        'title' => NULL,
+        'items' => NULL,
+      ],
+      'template' => 'templates/ting-relations/ting-local-relations',
+    ],
+    'local_relation' => [
+      'variables' => [
+        'item' => NULL,
+      ],
+      'template' => 'templates/ting-relations/ting-local-relation',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_facet_items_alter().
+ */
+function easyopac_local_material_facet_items_alter(array &$build, &$settings) {
+  if ($settings->facet == 'field_lm_object_author') {
+    $build = easyopac_local_material_merge_facet_items('field_lmd_contributor', $build);
+  }
+
+  if ($settings->facet == 'field_lm_subjects') {
+    $build = easyopac_local_material_merge_facet_items('field_lmd_spatial', $build);
+  }
+}
+
+/**
+ * Build, merge and sort facet block items.
+ *
+ * @param string $field
+ *   Facet field to be loaded.
+ * @param array $build
+ *   Original facet data.
+ *
+ * @return array
+ *   Merged and sorted facet items.
+ */
+function easyopac_local_material_merge_facet_items($field, array $build) {
+  $adapter = facetapi_adapter_load('search_api@local_material_index');
+  $facets = new FacetapiFacet($adapter, facetapi_facet_load($field, 'search_api@local_material_index'));
+  $processor = new FacetapiFacetProcessor($facets);
+  $processor->process();
+
+  $realm = facetapi_realm_load('block');
+  $facets->build($realm, $processor);
+
+  $build += $facets->getBuild();
+
+  return easyopac_local_material_array_orderby($build, '#count', SORT_DESC);
+}
+
+/**
+ * Order multidimensional array by column.
+ *
+ * @return array
+ *   Sorted array.
+ */
+function easyopac_local_material_array_orderby() {
+  $args = func_get_args();
+  $data = array_shift($args);
+  foreach ($args as $n => $field) {
+    if (is_string($field)) {
+      $tmp = [];
+      foreach ($data as $key => $row) {
+        $tmp[$key] = $row[$field];
+      }
+      $args[$n] = $tmp;
+    }
+  }
+  $args[] = &$data;
+  call_user_func_array('array_multisort', $args);
+  return array_pop($args);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function easyopac_local_material_form_local_material_node_form_alter(&$form, &$form_state, $form_id) {
+  // Hide fields.
+  $fields = [
+    'field_lm_holdings_information',
+    'field_lm_issues',
+    'field_lm_on_this_site',
+    'field_lmd_subject',
+    'field_lmd_type',
+  ];
+
+  foreach ($fields as $field) {
+    $form[$field]['#access'] = FALSE;
+  }
+}
+
+/**
+ * Implements hook_node_submit().
+ */
+function easyopac_local_material_node_submit($node, $form, &$form_state) {
+  $fields = [
+    'field_lm_object_type' => 'field_lmd_type',
+    'field_lm_subjects' => 'field_lmd_subject',
+  ];
+
+  foreach ($fields as $base => $secondary) {
+    $value = $form_state['values'][$base];
+    $node->$secondary = $value;
   }
 }
